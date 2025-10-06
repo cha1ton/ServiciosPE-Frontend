@@ -1,3 +1,5 @@
+// frontend/src/hooks/useGeolocation.ts
+
 'use client';
 
 import { useState, useEffect } from 'react';

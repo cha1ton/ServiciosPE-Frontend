@@ -51,6 +51,14 @@ useEffect(() => {
     }
   }, [authLoading, user, router]);
 
+
+  // ✅ AGREGAR ESTO PARA DEBUG
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 DEBUG Profile - Rol del usuario:', user.role);
+    }
+  }, [user]);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

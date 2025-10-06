@@ -1,3 +1,5 @@
+// src/app/(auth)/success/page.tsx
+
 'use client';
 
 import { useEffect } from 'react';
@@ -25,9 +27,9 @@ export default function SuccessPage() {
   }, [token, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-xl font-semibold">Iniciando sesión...</h2>
+    <div>
+      <div>
+        <h2>Iniciando sesión...</h2>
         <p>Por favor espera un momento.</p>
       </div>
     </div>

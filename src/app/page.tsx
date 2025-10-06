@@ -1,10 +1,10 @@
 // src/app/page.tsx
-'use client';
+"use client";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Navbar from '@/components/Layout/Navbar';
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Navbar from "@/components/Layout/Navbar";
 
 export default function HomePage() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -12,13 +12,13 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [loading, isAuthenticated, router]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div>
         <p>Cargando...</p>
       </div>
     );
@@ -29,21 +29,18 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div>
       <Navbar />
-      
-      <main className="p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-4">Bienvenido, {user?.nickname || user?.name}!</h1>
-          
+
+      <main>
+        <div>
+          <h1>Bienvenido, {user?.nickname || user?.name}!</h1>
+
           {/* Aquí irá el buscador y chat IA después */}
-          <div className="bg-gray-100 p-8 rounded-lg text-center">
+          <div>
             <p>🚧 Buscador de servicios y chat IA (próximamente)</p>
           </div>
-          <div className="h-[1000px] bg-gray-50">
-  Contenido de prueba para forzar scroll
-</div>
-
+          <div>Contenido de prueba para forzar scroll</div>
         </div>
       </main>
     </div>

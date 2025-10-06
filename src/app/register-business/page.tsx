@@ -188,7 +188,11 @@ export default function RegisterBusinessPage() {
         // ✅ IMPORTANTE: Refrescar datos del usuario para obtener el nuevo rol
         console.log('🔄 Refrescando datos del usuario...');
         await refreshUser();
-        console.log('✅ Datos del usuario actualizados:', user?.role);
+
+        // ✅ ESPERAR UN MOMENTO PARA QUE REACT ACTUALICE EL ESTADO
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        console.log('✅ Negocio registrado - usuario debería ser proveedor ahora');
 
         router.push("/?message=business_registered");
       } else {
