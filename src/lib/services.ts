@@ -45,54 +45,40 @@ export class BusinessService {
     formData: BusinessFormData,
     images: File[]
   ): Promise<ServiceResponse> {
-    const formDataToSend = new FormData();
+    const fd = new FormData();
 
     // Campos planos
-    formDataToSend.append("name", formData.name);
-    formDataToSend.append("description", formData.description);
-    formDataToSend.append("category", formData.category);
-    formDataToSend.append("phone", formData.phone);
-    formDataToSend.append("email", formData.email);
+    fd.append("name", formData.name);
+    fd.append("description", formData.description);
+    fd.append("category", formData.category);
 
-    // Dirección
-    formDataToSend.append("address[street]", formData.address.street);
-    formDataToSend.append("address[city]", formData.address.city);
-    formDataToSend.append("address[district]", formData.address.district);
-    formDataToSend.append(
-      "address[reference]",
-      formData.address.reference || ""
+    // ✅ Contacto como objeto (el schema lo espera dentro de 'contact')
+    fd.append(
+      "contact",
+      JSON.stringify({
+        phone: formData.phone,
+        email: formData.email,
+        website: ""
+      })
     );
 
-    // Coordenadas (si existen)
+    // ✅ Dirección como JSON (lo espera 'address')
+    fd.append("address", JSON.stringify(formData.address));
+
+    // ✅ Coordenadas como JSON (el controller las parsea)
     if (formData.coordinates) {
-      formDataToSend.append(
-        "coordinates[lat]",
-        String(formData.coordinates.lat)
-      );
-      formDataToSend.append(
-        "coordinates[lng]",
-        String(formData.coordinates.lng)
-      );
+      fd.append("coordinates", JSON.stringify(formData.coordinates));
     }
 
-    // Horario
-    Object.entries(formData.schedule).forEach(([day, schedule]) => {
-      formDataToSend.append(`schedule[${day}][open]`, schedule.open);
-      formDataToSend.append(`schedule[${day}][close]`, schedule.close);
-    });
+    // ✅ Horario como JSON (evitas caer en DEFAULT_SCHEDULE)
+    fd.append("schedule", JSON.stringify(formData.schedule));
 
     // Imágenes
     images.forEach((image) => {
-      formDataToSend.append("images", image);
+      fd.append("images", image);
     });
 
-    const response = await api.post("/services", formDataToSend); // no es necesario Content-Type
-
-    return response.data;
-  }
-
-  static async getMyBusinesses() {
-    const response = await api.get("/services/my-services");
+    const response = await api.post("/services", fd);
     return response.data;
   }
 }

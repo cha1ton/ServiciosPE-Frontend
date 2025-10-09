@@ -253,8 +253,9 @@ useEffect(() => {
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Miembro desde:</span>
                 <span className={styles.infoValue}>
-                  {new Date().toLocaleDateString("es-PE")}
-                </span>
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString("es-PE") : "-"}
+                  </span>
+
               </div>
             </div>
           </div>

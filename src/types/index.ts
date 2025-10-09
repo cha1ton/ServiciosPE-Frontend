@@ -8,6 +8,7 @@ export interface User {
   nickname?: string;
   customPhoto?: string;
   role: 'user' | 'provider' | 'admin';
+  createdAt?: string; // ✅
 }
 
 export interface AuthResponse {

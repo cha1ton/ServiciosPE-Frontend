@@ -200,7 +200,8 @@ export default function RegisterBusinessPage() {
       }
     } catch (error: any) {
       console.error('❌ Error registrando negocio:', error);
-      setError(error.message || "Error al registrar el negocio");
+      const backendMessage = error?.response?.data?.message;
+      setError(backendMessage || error.message || "Error al registrar el negocio");
     } finally {
       setLoading(false);
     }
@@ -347,7 +348,7 @@ export default function RegisterBusinessPage() {
 
             {/* Imágenes */}
             <div>
-              <label>Imágenes del Negocio (Máximo 3, 2MB cada una) *</label>
+              <label>Imágenes del Negocio (3 Imágenes, 2MB cada una) *</label>
               <input
                 type="file"
                 multiple
