@@ -250,13 +250,6 @@ useEffect(() => {
                   {user.role === "provider" ? "Proveedor" : "Usuario"}
                 </span>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Miembro desde:</span>
-                <span className={styles.infoValue}>
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString("es-PE") : "-"}
-                  </span>
-
-              </div>
             </div>
           </div>
         </div>

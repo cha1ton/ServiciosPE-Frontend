@@ -78,8 +78,13 @@ export default function Navbar() {
   };
 
   const handleRegisterBusiness = () => {
-    router.push("/register-business");
+    if (user?.role === 'provider') {
+      router.push('/my-business/edit');   // ya tiene negocio → editar
+    } else {
+      router.push('/register-business');  // aún no tiene → registrar
+    }
   };
+
 
   const handleProfile = () => {
     router.push("/profile");
