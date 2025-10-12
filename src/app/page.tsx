@@ -9,9 +9,19 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import CategoryChips, { CategoryKey } from "@/components/Home/CategoryChips";
 import SearchBar from "@/components/Home/SearchBar";
 
+import { SearchItem, SearchService } from "@/lib/search";
+import ResultCard from "@/components/Home/ResultCard";
+
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
 export default function HomePage() {
+
+  //---NUEVO---
+  const [results, setResults] = useState<SearchItem[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  //---FIN DE NUEVO---
+
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
@@ -47,19 +57,28 @@ export default function HomePage() {
     [user?.role]
   );
 
-  const handleSearch = () => {
-    console.log("🔎 Buscar con:", {
-      query,
-      category,
-      distance,
-      openNow,
-      coords: coordinates || "(sin coords)",
-    });
-    alert(
-      `Buscar:\n- q: ${query || "(vacío)"}\n- cat: ${category || "(todas)"}\n- dist: ${distance} m\n- openNow: ${openNow ? "sí" : "no"}\n- coords: ${
-        coordinates ? `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}` : "no disponibles"
-      }`
-    );
+  const handleSearch = async () => {
+    if (!coordinates) return;
+    setSearching(true);
+    setErrorMsg("");
+    try {
+      const resp = await SearchService.search({
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        radius: distance,
+        category: category || undefined,
+        openNow,
+        q: query || undefined,
+        page: 1,
+        limit: 20,
+      });
+      setResults(resp.results);
+    } catch (e: any) {
+      console.error(e);
+      setErrorMsg(e?.message || "Error buscando servicios");
+    } finally {
+      setSearching(false);
+    }
   };
 
   // Ahora sí puedes retornar condicionalmente, ya llamaste todos los hooks
@@ -150,10 +169,17 @@ export default function HomePage() {
         />
 
         {/* Placeholder de resultados / mapa */}
-        <section style={{ marginTop: 20, padding: 12, border: "1px dashed #ddd", borderRadius: 12, background: "#fff" }}>
-          <p style={{ margin: 0, color: "#666" }}>
-            Aquí irá la lista + mapa de resultados. Cuando tengas el endpoint, conecta el botón <b>Buscar</b> con tu API.
-          </p>
+        <section style={{ marginTop: 20, display: "grid", gap: 12 }}>
+          {searching && <div>Buscando…</div>}
+          {errorMsg && <div style={{ color: "#a00" }}>{errorMsg}</div>}
+          {!searching && results.length === 0 && (
+            <div style={{ padding: 12, border: "1px dashed #ddd", borderRadius: 12, background: "#fff", color: "#666" }}>
+              Usa el buscador para ver resultados cerca de ti.
+            </div>
+          )}
+          {results.map((it) => (
+            <ResultCard key={it.id} item={it} />
+          ))}
         </section>
       </main>
     </div>
