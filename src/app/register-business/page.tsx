@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Layout/Navbar";
 import { BusinessService, BusinessFormData } from "@/lib/services";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import MapPicker from "@/components/Map/MapPicker";
 
 const CATEGORIES = [
   { value: "restaurante", label: "Restaurante" },
@@ -20,11 +21,16 @@ const CATEGORIES = [
 export default function RegisterBusinessPage() {
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
-  const {
-    coordinates,
-    getCurrentLocation,
-    loading: geoLoading,
-  } = useGeolocation();
+
+  const { coordinates: geoCoords, getCurrentLocation, loading: geoLoading } = useGeolocation();
+
+  // NUEVO: estado para el pin
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+   // Centrar mapa en geolocalización cuando llegue
+  useEffect(() => {
+    if (!geoCoords) getCurrentLocation();
+  }, []);
 
   const [formData, setFormData] = useState<BusinessFormData>({
     name: "",
@@ -32,12 +38,7 @@ export default function RegisterBusinessPage() {
     category: "",
     phone: "",
     email: "",
-    address: {
-      street: "",
-      city: "",
-      district: "",
-      reference: "",
-    },
+    address: {},
     // ✅ CORRECCIÓN: Usar los valores directamente, no la constante
     schedule: {
       monday: { open: "09:00", close: "18:00" },
@@ -164,6 +165,11 @@ export default function RegisterBusinessPage() {
         throw new Error("Por favor completa todos los campos requeridos");
       }
 
+      // ⚠️ coords obligatorias (pin en el mapa)
+      if (!coords) {
+        throw new Error("Selecciona la ubicación en el mapa");
+      }
+
       if (images.length === 0) {
         throw new Error("Debes subir al menos una imagen del negocio");
       }
@@ -171,11 +177,12 @@ export default function RegisterBusinessPage() {
       // Agregar coordenadas si están disponibles
       const submissionData = {
         ...formData,
-        coordinates: coordinates || undefined,
+        // fuente de verdad:
+        coordinates: coords,
+        // los campos de address (street/district/city/reference) quedan opcionales
       };
 
-
-      console.log('📤 Enviando datos del negocio...');
+      console.log('📤 Enviando datos del negocio (coords como verdad)...');
 
       const result = await BusinessService.registerBusiness(
         submissionData,
@@ -184,13 +191,10 @@ export default function RegisterBusinessPage() {
 
       if (result.success) {
         console.log('✅ Negocio registrado exitosamente');
-        
-        // ✅ IMPORTANTE: Refrescar datos del usuario para obtener el nuevo rol
         console.log('🔄 Refrescando datos del usuario...');
-        await refreshUser();
 
-        // ✅ ESPERAR UN MOMENTO PARA QUE REACT ACTUALICE EL ESTADO
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await refreshUser();
+        await new Promise(r => setTimeout(r, 100));
 
         console.log('✅ Negocio registrado - usuario debería ser proveedor ahora');
 
@@ -288,60 +292,63 @@ export default function RegisterBusinessPage() {
               </div>
             </div>
 
-            {/* Dirección */}
-            <div>
-              <label>Dirección *</label>
+
+            {/* Agregando codigo - 11/10/25 */}
+            {/* Dirección opcional (solo informativa) */}
+            <div style={{ marginTop: 16 }}>
+              <label>Información de dirección (opcional)</label>
+              <p style={{ margin: '6px 0 12px', fontSize: 13 }}>
+                Estos campos son solo informativos. La ubicación real se toma del pin del mapa.
+              </p>
+
               <div>
-                <input
-                  type="text"
-                  name="address.street"
-                  placeholder="Calle y número"
-                  required
-                  value={formData.address.street}
-                  onChange={handleInputChange}
-                />
-                <div>
-                  <input
-                    type="text"
-                    name="address.district"
-                    placeholder="Distrito"
-                    required
-                    value={formData.address.district}
-                    onChange={handleInputChange}
-                  />
-                  <input
-                    type="text"
-                    name="address.city"
-                    placeholder="Ciudad"
-                    required
-                    value={formData.address.city}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <input
-                  type="text"
-                  name="address.reference"
-                  placeholder="Referencia (opcional)"
-                  value={formData.address.reference}
+                <input type="text" name="address.street" placeholder="Calle y número (opcional)"
+                  value={formData.address?.street || ""}
                   onChange={handleInputChange}
                 />
               </div>
 
               <div>
-                <button
-                  type="button"
-                  onClick={handleGetLocation}
-                  disabled={geoLoading}
-                >
-                  {geoLoading
-                    ? "Obteniendo ubicación..."
-                    : "Usar mi ubicación actual"}
-                </button>
-                {coordinates && (
-                  <span>
-                    ✓ Ubicación obtenida: {coordinates.lat.toFixed(4)},{" "}
-                    {coordinates.lng.toFixed(4)}
-                  </span>
+                <input type="text" name="address.district" placeholder="Distrito (opcional)"
+                  value={formData.address?.district || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <input type="text" name="address.city" placeholder="Ciudad (opcional)"
+                  value={formData.address?.city || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div>
+                <input type="text" name="address.reference" placeholder="Referencia (opcional)"
+                  value={formData.address?.reference || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+
+            {/* UBICACIÓN: Mapa con pin obligatorio */}
+            <div style={{ marginTop: 16 }}>
+              <label>Ubicación en el mapa *</label>
+              <p style={{ margin: '6px 0 12px', fontSize: 14 }}>
+                Arrastra el pin o toca el mapa para fijar la ubicación exacta del negocio.
+              </p>
+
+              <MapPicker
+                initialCenter={geoCoords || { lat: -12.0464, lng: -77.0428 }}
+                value={coords}
+                onChange={setCoords}
+                height="320px"
+              />
+
+              <div style={{ marginTop: 8, fontSize: 13 }}>
+                {coords ? (
+                  <>Coordenadas seleccionadas: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</>
+                ) : (
+                  <span style={{ color: '#d00' }}>Selecciona la ubicación en el mapa</span>
                 )}
               </div>
             </div>
@@ -409,3 +416,4 @@ export default function RegisterBusinessPage() {
     </div>
   );
 }
+

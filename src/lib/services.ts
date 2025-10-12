@@ -8,11 +8,13 @@ export interface BusinessFormData {
   phone: string;
   email: string;
   address: {
-    street: string;
-    city: string;
-    district: string;
+    street?: string;
+    city?: string;
+    district?: string;
     reference?: string;
+    formatted?: string;
   };
+
   coordinates?: {
     lat: number;
     lng: number;
@@ -40,6 +42,11 @@ export interface ServiceResponse {
   };
 }
 
+export interface MyService {
+  _id: string;
+  name: string;
+}
+
 export class BusinessService {
   static async registerBusiness(
     formData: BusinessFormData,
@@ -58,12 +65,23 @@ export class BusinessService {
       JSON.stringify({
         phone: formData.phone,
         email: formData.email,
-        website: ""
+        website: "",
       })
     );
 
-    // ✅ Dirección como JSON (lo espera 'address')
-    fd.append("address", JSON.stringify(formData.address));
+    // ✅ Dirección como JSON solo con claves presentes
+    const addressPayload: any = {};
+    if (formData.address?.street)
+      addressPayload.street = formData.address.street;
+    if (formData.address?.district)
+      addressPayload.district = formData.address.district;
+    if (formData.address?.city) addressPayload.city = formData.address.city;
+    if (formData.address?.reference)
+      addressPayload.reference = formData.address.reference;
+    if (formData.address?.formatted)
+      addressPayload.formatted = formData.address.formatted;
+
+    fd.append("address", JSON.stringify(addressPayload));
 
     // ✅ Coordenadas como JSON (el controller las parsea)
     if (formData.coordinates) {
