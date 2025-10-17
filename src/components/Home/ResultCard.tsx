@@ -36,8 +36,10 @@ export default function ResultCard({ item }: { item: SearchItem }) {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <h3 style={{ margin: 0 }}>{item.name}</h3>
-          <span style={{ fontSize: 12, color: "#666", border: "1px solid #ddd", borderRadius: 8, padding: "2px 6px" }}>
-            {item.category}
+          <span style={{fontSize: 12, color: "#666", border: "1px solid #ddd",
+              borderRadius: 8, padding: "2px 6px"
+            }}>
+            Fuente · {item.source === "google" ? "Google" : "ServiciosPE"}
           </span>
         </div>
         <div style={{ marginTop: 6, fontSize: 14, color: "#444" }}>

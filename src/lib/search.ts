@@ -15,6 +15,7 @@ export interface SearchParams {
 
 export interface SearchItem {
   id: string;
+  source: 'serviciospe' | 'google';
   name: string;
   category: string;
   distanceMeters: number;
@@ -22,7 +23,7 @@ export interface SearchItem {
   address: { formatted?: string; street?: string; district?: string; city?: string };
   rating: { average: number; count: number };
   contact?: { phone?: string; email?: string; website?: string };
-  image?: string; // data URL
+  image?: string;      // data URL (tuyo) o URL de proxy (Google)
   createdAt?: string;
 }
 

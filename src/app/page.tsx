@@ -8,38 +8,36 @@ import Navbar from "@/components/Layout/Navbar";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import CategoryChips, { CategoryKey } from "@/components/Home/CategoryChips";
 import SearchBar from "@/components/Home/SearchBar";
-
-import { SearchItem, SearchService } from "@/lib/search";
 import ResultCard from "@/components/Home/ResultCard";
+import { SearchItem, SearchService } from "@/lib/search";
 
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
 export default function HomePage() {
-
-  //---NUEVO---
-  const [results, setResults] = useState<SearchItem[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  //---FIN DE NUEVO---
-
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   const { coordinates, getCurrentLocation, loading: geoLoading, error: geoError } = useGeolocation();
 
+  // Estado de filtros / consulta
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "">("");
-  const [distance, setDistance] = useState<DistanceOption>(1000);
+  const [distance, setDistance] = useState<DistanceOption>(500); // ✅ 500 m por defecto
   const [openNow, setOpenNow] = useState(false);
 
-  // Redirección a login si no está autenticado
+  // Estado de resultados
+  const [results, setResults] = useState<SearchItem[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Redirigir a login si no está autenticado
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login");
     }
   }, [loading, isAuthenticated, router]);
 
-  // Pide ubicación al entrar (solo una vez)
+  // Pedir ubicación al entrar (una sola vez)
   useEffect(() => {
     if (!coordinates && !geoLoading) {
       getCurrentLocation();
@@ -47,7 +45,7 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ⚠️ HOOKS SIEMPRE ANTES DE CUALQUIER RETURN
+  // CTA proveedor / usuario (hooks antes de cualquier return)
   const ctaLabel = useMemo(
     () => (user?.role === "provider" ? "Editar mi negocio" : "Registrar mi negocio"),
     [user?.role]
@@ -57,6 +55,7 @@ export default function HomePage() {
     [user?.role]
   );
 
+  // Buscar manual (cuando el usuario presiona el botón “Buscar”)
   const handleSearch = async () => {
     if (!coordinates) return;
     setSearching(true);
@@ -75,13 +74,42 @@ export default function HomePage() {
       setResults(resp.results);
     } catch (e: any) {
       console.error(e);
-      setErrorMsg(e?.message || "Error buscando servicios");
+      setErrorMsg(e?.response?.data?.message || e?.message || "Error buscando servicios");
     } finally {
       setSearching(false);
     }
   };
 
-  // Ahora sí puedes retornar condicionalmente, ya llamaste todos los hooks
+  // 🔹 AUTO-FEED: cuando haya coords o cambien filtros básicos, trae cercanos SIN q (lista inicial)
+  useEffect(() => {
+    const run = async () => {
+      if (!coordinates) return;
+      setSearching(true);
+      setErrorMsg("");
+      try {
+        const resp = await SearchService.search({
+          lat: coordinates.lat,
+          lng: coordinates.lng,
+          radius: distance,
+          category: category || undefined,
+          openNow,
+          // 👇 Sin q: esto muestra lugares (tus servicios + Google) cercanos por defecto
+          page: 1,
+          limit: 20,
+        });
+        setResults(resp.results);
+      } catch (e: any) {
+        console.error(e);
+        setErrorMsg(e?.response?.data?.message || e?.message || "Error cargando cercanos");
+      } finally {
+        setSearching(false);
+      }
+    };
+    run();
+    // Actualiza cuando cambien coords, distancia, categoría u “abierto ahora”
+  }, [coordinates?.lat, coordinates?.lng, distance, category, openNow]);
+
+  // Carga / no autenticado
   if (loading || !isAuthenticated) {
     return (
       <div>
@@ -149,7 +177,7 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Buscador */}
+        {/* Buscador (si escribes texto y das “Buscar”, sobreescribe la lista) */}
         <SearchBar
           value={query}
           onChange={setQuery}
@@ -168,17 +196,29 @@ export default function HomePage() {
           style={{ marginTop: 12 }}
         />
 
-        {/* Placeholder de resultados / mapa */}
+        {/* Resultados */}
         <section style={{ marginTop: 20, display: "grid", gap: 12 }}>
           {searching && <div>Buscando…</div>}
           {errorMsg && <div style={{ color: "#a00" }}>{errorMsg}</div>}
+
           {!searching && results.length === 0 && (
-            <div style={{ padding: 12, border: "1px dashed #ddd", borderRadius: 12, background: "#fff", color: "#666" }}>
-              Usa el buscador para ver resultados cerca de ti.
+            <div
+              style={{
+                padding: 12,
+                border: "1px dashed #ddd",
+                borderRadius: 12,
+                background: "#fff",
+                color: "#666",
+              }}
+            >
+              {coordinates
+                ? "No encontramos resultados en esta zona y filtros."
+                : "Autoriza la ubicación para ver lugares cercanos."}
             </div>
           )}
+
           {results.map((it) => (
-            <ResultCard key={it.id} item={it} />
+            <ResultCard key={`${it.source}-${it.id}`} item={it} />
           ))}
         </section>
       </main>
