@@ -4,7 +4,21 @@
 import React from "react";
 import { SearchItem } from "@/lib/search";
 
-export default function ResultCard({ item }: { item: SearchItem }) {
+type LatLng = { lat: number; lng: number };
+
+function buildDirectionsUrl(origin: LatLng, dest: LatLng, mode: "walking" | "driving" | "transit" = "walking") {
+  const o = `${origin.lat},${origin.lng}`;
+  const d = `${dest.lat},${dest.lng}`;
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(o)}&destination=${encodeURIComponent(d)}&travelmode=${mode}`;
+}
+
+export default function ResultCard({ item, origin }: { item: SearchItem; origin?: LatLng }) {
+  const hasOrigin = !!origin && typeof origin.lat === "number" && typeof origin.lng === "number";
+  const hasDest = !!item.coordinates && typeof item.coordinates.lat === "number" && typeof item.coordinates.lng === "number";
+  const directionsUrl = hasOrigin && hasDest
+    ? buildDirectionsUrl(origin!, item.coordinates!)
+    : "";
+
   return (
     <div
       style={{
@@ -36,19 +50,69 @@ export default function ResultCard({ item }: { item: SearchItem }) {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <h3 style={{ margin: 0 }}>{item.name}</h3>
-          <span style={{fontSize: 12, color: "#666", border: "1px solid #ddd",
-              borderRadius: 8, padding: "2px 6px"
-            }}>
+          <span
+            style={{
+              fontSize: 12,
+              color: "#666",
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              padding: "2px 6px",
+            }}
+          >
             Fuente · {item.source === "google" ? "Google" : "ServiciosPE"}
           </span>
         </div>
+
         <div style={{ marginTop: 6, fontSize: 14, color: "#444" }}>
-          {item.address?.formatted || [item.address?.street, item.address?.district, item.address?.city].filter(Boolean).join(", ")}
+          {item.address?.formatted ||
+            [item.address?.street, item.address?.district, item.address?.city].filter(Boolean).join(", ")}
         </div>
+
         <div style={{ marginTop: 6, fontSize: 14, color: "#666" }}>
           {Math.round(item.distanceMeters)} m • ⭐ {item.rating?.average?.toFixed(1) ?? "0"} ({item.rating?.count ?? 0})
         </div>
-        {item.contact?.phone && <div style={{ marginTop: 6, fontSize: 13, color: "#555" }}>📞 {item.contact.phone}</div>}
+
+        {item.contact?.phone && (
+          <div style={{ marginTop: 6, fontSize: 13, color: "#555" }}>📞 {item.contact.phone}</div>
+        )}
+
+        {/* Botón Cómo llegar */}
+        <div style={{ marginTop: 10 }}>
+          {hasOrigin && hasDest ? (
+            <a
+              href={directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-block",
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid #ddd",
+                background: "#f7f7f8",
+                textDecoration: "none",
+                color: "#111",
+              }}
+              title="Abrir ruta en Google Maps"
+            >
+              ➜ Cómo llegar
+            </a>
+          ) : (
+            <button
+              disabled
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid #eee",
+                background: "#eee",
+                color: "#888",
+                cursor: "not-allowed",
+              }}
+              title="Necesitas permitir ubicación para trazar la ruta"
+            >
+              ➜ Cómo llegar
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

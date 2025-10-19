@@ -218,7 +218,7 @@ export default function HomePage() {
           )}
 
           {results.map((it) => (
-            <ResultCard key={`${it.source}-${it.id}`} item={it} />
+            <ResultCard key={it.id} item={it} origin={coordinates ?? undefined} />
           ))}
         </section>
       </main>
