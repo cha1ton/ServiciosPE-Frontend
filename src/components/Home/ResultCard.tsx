@@ -3,6 +3,7 @@
 "use client";
 import React from "react";
 import { SearchItem } from "@/lib/search";
+import { useRouter } from "next/navigation";
 
 type LatLng = { lat: number; lng: number };
 
@@ -13,6 +14,12 @@ function buildDirectionsUrl(origin: LatLng, dest: LatLng, mode: "walking" | "dri
 }
 
 export default function ResultCard({ item, origin }: { item: SearchItem; origin?: LatLng }) {
+
+  const router = useRouter();
+  const goDetail = () => {
+    // para locales: source="serviciospe"; para Google: source="google"
+    router.push(`/service/${item.source}/${item.id}`);
+  };
   const hasOrigin = !!origin && typeof origin.lat === "number" && typeof origin.lng === "number";
   const hasDest = !!item.coordinates && typeof item.coordinates.lat === "number" && typeof item.coordinates.lng === "number";
   const directionsUrl = hasOrigin && hasDest
@@ -41,9 +48,23 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
         }}
       >
         {item.image ? (
-          <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img
+            src={item.image}
+            alt={item.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         ) : (
-          <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "#999" }}>Sin foto</div>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "grid",
+              placeItems: "center",
+              color: "#999",
+            }}
+          >
+            Sin foto
+          </div>
         )}
       </div>
 
@@ -65,19 +86,38 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
 
         <div style={{ marginTop: 6, fontSize: 14, color: "#444" }}>
           {item.address?.formatted ||
-            [item.address?.street, item.address?.district, item.address?.city].filter(Boolean).join(", ")}
+            [item.address?.street, item.address?.district, item.address?.city]
+              .filter(Boolean)
+              .join(", ")}
         </div>
 
         <div style={{ marginTop: 6, fontSize: 14, color: "#666" }}>
-          {Math.round(item.distanceMeters)} m • ⭐ {item.rating?.average?.toFixed(1) ?? "0"} ({item.rating?.count ?? 0})
+          {Math.round(item.distanceMeters)} m • ⭐{" "}
+          {item.rating?.average?.toFixed(1) ?? "0"} ({item.rating?.count ?? 0})
         </div>
 
         {item.contact?.phone && (
-          <div style={{ marginTop: 6, fontSize: 13, color: "#555" }}>📞 {item.contact.phone}</div>
+          <div style={{ marginTop: 6, fontSize: 13, color: "#555" }}>
+            📞 {item.contact.phone}
+          </div>
         )}
 
-        {/* Botón Cómo llegar */}
-        <div style={{ marginTop: 10 }}>
+        {/* Controles: botones separados, sin conflicto de clic */}
+        <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            onClick={goDetail}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 10,
+              border: "1px solid #ddd",
+              background: "#f7f7f8",
+              cursor: "pointer",
+            }}
+            title="Ver detalles del servicio"
+          >
+            👁️ Ver detalle
+          </button>
+
           {hasOrigin && hasDest ? (
             <a
               href={directionsUrl}
@@ -94,7 +134,7 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
               }}
               title="Abrir ruta en Google Maps"
             >
-              ➜ Cómo llegar
+              🗺️ Cómo llegar
             </a>
           ) : (
             <button
@@ -109,7 +149,7 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
               }}
               title="Necesitas permitir ubicación para trazar la ruta"
             >
-              ➜ Cómo llegar
+              🗺️ Cómo llegar
             </button>
           )}
         </div>

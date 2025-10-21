@@ -51,3 +51,8 @@ export class SearchService {
     return data;
   }
 }
+
+export async function getLocalServiceDetail(id: string) {
+  const resp = await api.get(`/services/${id}`);
+  return resp.data; // { success, service }
+}

@@ -10,6 +10,7 @@ import CategoryChips, { CategoryKey } from "@/components/Home/CategoryChips";
 import SearchBar from "@/components/Home/SearchBar";
 import ResultCard from "@/components/Home/ResultCard";
 import { SearchItem, SearchService } from "@/lib/search";
+import { setNearbyCache } from '@/lib/searchCache';
 
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
@@ -72,6 +73,12 @@ export default function HomePage() {
         limit: 20,
       });
       setResults(resp.results);
+      // guarda caché para detalle
+      setNearbyCache({
+        ts: Date.now(),
+        center: { lat: coordinates.lat, lng: coordinates.lng },
+        results: resp.results,
+      });
     } catch (e: any) {
       console.error(e);
       setErrorMsg(e?.response?.data?.message || e?.message || "Error buscando servicios");
@@ -98,6 +105,12 @@ export default function HomePage() {
           limit: 20,
         });
         setResults(resp.results);
+        // guarda caché para detalle
+        setNearbyCache({
+          ts: Date.now(),
+          center: { lat: coordinates.lat, lng: coordinates.lng },
+          results: resp.results,
+        });
       } catch (e: any) {
         console.error(e);
         setErrorMsg(e?.response?.data?.message || e?.message || "Error cargando cercanos");
