@@ -153,9 +153,9 @@ export default function ServiceDetailPage() {
               address: service.address,
               rating: service.rating,
               contact: service.contact,
-              // guarda las 3 fotos en item.imagesUrl (nuevo campo local)
               imagesUrl: (service.images || []).map((i: any) => i.url).filter(Boolean),
               description: service.description || '',
+              schedule: service.schedule || null
             } : prev);
           }
         } catch {
@@ -405,6 +405,29 @@ export default function ServiceDetailPage() {
             </button>
           </div>
         </section>
+
+        {/* Horario */}
+        {(item as any).schedule && (
+          <div style={{ marginTop: 12 }}>
+            <h3 style={{ margin: "0 0 6px" }}>Horario</h3>
+            <div style={{ display: "grid", gap: 6, fontSize: 14 }}>
+              {["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map((d) => {
+                const row = (item as any).schedule?.[d];
+                const label: Record<string,string> = {
+                  monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles",
+                  thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo"
+                };
+                const txt = row?.open && row?.close ? `${row.open} – ${row.close}` : "Cerrado";
+                return (
+                  <div key={d} style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>{label[d]}</span>
+                    <span style={{ color: "#444" }}>{txt}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Reseñas (solo locales) */}
         {canComment && (
