@@ -1,5 +1,5 @@
 // frontend/src/app/service/[source]/[id]/page.tsx
-// GAAA
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -13,7 +13,7 @@ import { FavoritesService } from "@/lib/favorites";
 import { ReviewsService, ReviewPayload } from "@/lib/reviews";
 import { getLocalServiceDetail } from "@/lib/search";
 
-
+//GAAA
 type LatLng = { lat: number; lng: number };
 
 function buildDirectionsUrl(
@@ -48,6 +48,19 @@ export default function ServiceDetailPage() {
 
   // Geo (para “Cómo llegar”)
   const { coordinates, getCurrentLocation } = useGeolocation();
+
+  // 22-10-25 05:45am
+  const [canReply, setCanReply] = useState(false);
+  const [replyWindowMin, setReplyWindowMin] = useState(15);
+  const [replyDraft, setReplyDraft] = useState<Record<string, string>>({}); // reviewId -> text
+  const [replyingId, setReplyingId] = useState<string | null>(null); // reviewId que estoy respondiendo/editando
+
+  function canEditOwnerReply(r: any) {
+  if (!r.ownerReply) return false;
+  const created = new Date(r.ownerReply.createdAt).getTime();
+  const now = Date.now();
+  return (now - created) <= replyWindowMin * 60 * 1000;
+}
 
   // 🔹 Pide ubicación al montar (igual que haces en la lista)
   useEffect(() => {
@@ -128,8 +141,10 @@ export default function ServiceDetailPage() {
     (async () => {
       try {
         setRevLoading(true);
-        const { reviews } = await ReviewsService.list(item.id);
+        const { reviews, canReply, replyEditWindowMinutes } = await ReviewsService.list(item.id);
         setReviews(reviews);
+        setCanReply(!!canReply);
+        if (replyEditWindowMinutes) setReplyWindowMin(replyEditWindowMinutes);
       } catch (e: any) {
         setRevError(e?.message || "Error cargando reseñas");
       } finally {
@@ -184,6 +199,27 @@ export default function ServiceDetailPage() {
       setFavLoading(false);
     }
   };
+
+  async function submitOwnerReply(reviewId: string) {
+  const text = (replyDraft[reviewId] || '').trim();
+  if (!text) return;
+  try {
+    setRevLoading(true);
+    setRevError('');
+    await ReviewsService.reply(reviewId, text);
+    // recargar lista
+    const res = await ReviewsService.list(item!.id);
+    setReviews(res.reviews);
+    setCanReply(!!res.canReply);
+    if (res.replyEditWindowMinutes) setReplyWindowMin(res.replyEditWindowMinutes);
+    setReplyingId(null);
+  } catch (e: any) {
+    setRevError(e?.message || 'Error enviando respuesta');
+  } finally {
+    setRevLoading(false);
+  }
+}
+
 
   const submitReview = async () => {
     if (!item || !canComment) return;
@@ -514,29 +550,129 @@ export default function ServiceDetailPage() {
                   Sé el primero en reseñar este lugar.
                 </div>
               )}
-              {reviews.map((r) => (
-                <div
-                  key={r._id}
-                  style={{
-                    border: "1px solid #eee",
-                    borderRadius: 12,
-                    padding: 12,
-                    background: "#fff",
-                  }}
+              {reviews.map((r) => {
+  const ownerHasReply = !!r.ownerReply;
+  const editable = ownerHasReply && canEditOwnerReply(r);
+
+  return (
+    <div key={r._id} style={{ border: "1px solid #eee", borderRadius: 12, padding: 12, background: "#fff" }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <strong>{r.authorName || "Usuario"}</strong>
+        <span>•</span>
+        <span>{new Date(r.createdAt).toLocaleDateString("es-PE")}</span>
+        <span style={{ marginLeft: "auto" }}>⭐ {r.rating}</span>
+      </div>
+      <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{r.comment}</div>
+
+      {/* Respuesta del dueño (si existe) */}
+      {ownerHasReply && (
+        <div style={{
+          marginTop: 10,
+          padding: 10,
+          borderLeft: "4px solid #4caf50",
+          background: "#f6fff7",
+          borderRadius: 8
+        }}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>Respuesta del dueño</div>
+          <div style={{ whiteSpace: "pre-wrap" }}>{r.ownerReply.text}</div>
+          <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+            {editable
+              ? `Puedes editar por ~${replyWindowMin} min desde la primera respuesta.`
+              : `Respondido el ${new Date(r.ownerReply.createdAt).toLocaleString("es-PE")}`}
+          </div>
+        </div>
+      )}
+
+      {/* Acciones del dueño */}
+      {canReply && (
+        <div style={{ marginTop: 8 }}>
+          {!ownerHasReply ? (
+            <>
+              {replyingId === r._id ? (
+                <>
+                  <textarea
+                    placeholder="Escribe tu respuesta (máx. 300)"
+                    maxLength={300}
+                    value={replyDraft[r._id] || ""}
+                    onChange={(e) =>
+                      setReplyDraft(prev => ({ ...prev, [r._id]: e.target.value }))
+                    }
+                    rows={3}
+                    style={{ width: "100%", borderRadius: 10, border: "1px solid #ddd", padding: 8 }}
+                  />
+                  <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
+                    <button
+                      disabled={revLoading || !(replyDraft[r._id] || '').trim()}
+                      onClick={() => submitOwnerReply(r._id)}
+                      style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
+                    >
+                      Publicar respuesta
+                    </button>
+                    <button
+                      onClick={() => setReplyingId(null)}
+                      style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#fff" }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button
+                  onClick={() => { setReplyingId(r._id); setReplyDraft(prev => ({ ...prev, [r._id]: '' })); }}
+                  style={{ marginTop: 6, padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
                 >
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <strong>{r.authorName || "Usuario"}</strong>
-                    <span>•</span>
-                    <span>
-                      {new Date(r.createdAt).toLocaleDateString("es-PE")}
-                    </span>
-                    <span style={{ marginLeft: "auto" }}>⭐ {r.rating}</span>
-                  </div>
-                  <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
-                    {r.comment}
-                  </div>
-                </div>
-              ))}
+                  Responder como dueño
+                </button>
+              )}
+            </>
+          ) : (
+            editable && (
+              <>
+                {replyingId === r._id ? (
+                  <>
+                    <textarea
+                      placeholder="Editar respuesta (máx. 300)"
+                      maxLength={300}
+                      value={replyDraft[r._id] ?? r.ownerReply.text}
+                      onChange={(e) =>
+                        setReplyDraft(prev => ({ ...prev, [r._id]: e.target.value }))
+                      }
+                      rows={3}
+                      style={{ width: "100%", borderRadius: 10, border: "1px solid #ddd", padding: 8 }}
+                    />
+                    <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
+                      <button
+                        disabled={revLoading || !(replyDraft[r._id] ?? r.ownerReply.text).trim()}
+                        onClick={() => submitOwnerReply(r._id)}
+                        style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
+                      >
+                        Guardar cambios
+                      </button>
+                      <button
+                        onClick={() => setReplyingId(null)}
+                        style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#fff" }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => { setReplyingId(r._id); setReplyDraft(prev => ({ ...prev, [r._id]: r.ownerReply.text })); }}
+                    style={{ marginTop: 6, padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
+                  >
+                    Editar respuesta
+                  </button>
+                )}
+              </>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+})}
+
             </div>
           </section>
         )}
