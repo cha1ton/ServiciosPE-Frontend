@@ -11,6 +11,7 @@ import SearchBar from "@/components/Home/SearchBar";
 import ResultCard from "@/components/Home/ResultCard";
 import { SearchItem, SearchService } from "@/lib/search";
 import { setNearbyCache } from '@/lib/searchCache';
+import ChatWidget from "@/components/Chat/ChatWidget";
 
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
@@ -189,6 +190,23 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        <ChatWidget
+          coords={coordinates || null}
+          defaultDistance={distance}
+          initialCategory={category || ""}
+          onRunSearch={(opts) => {
+            // Si el bot propone filtros, actualízalos y ejecuta la búsqueda
+            if (opts.distance) setDistance(opts.distance as any);
+            if (typeof opts.openNow === "boolean") setOpenNow(opts.openNow);
+            if (typeof opts.category === "string") setCategory(opts.category as any);
+            if (typeof opts.q === "string") setQuery(opts.q);
+
+            // dispara la búsqueda con el estado actualizado
+            // pequeño delay para asegurar setState
+            setTimeout(() => handleSearch(), 0);
+          }}
+        />
 
         {/* Buscador (si escribes texto y das “Buscar”, sobreescribe la lista) */}
         <SearchBar
