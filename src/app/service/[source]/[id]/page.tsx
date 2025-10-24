@@ -223,34 +223,26 @@ export default function ServiceDetailPage() {
 
   const submitReview = async () => {
     if (!item || !canComment) return;
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
+    if (!isAuthenticated) { router.push("/login"); return; }
 
     try {
       setRevLoading(true);
       setRevError("");
 
       const payload: ReviewPayload = { rating: myRating, comment: myComment };
-
-      // 1) Crear la reseña
       await ReviewsService.create(item.id, payload);
-
-      // 2) Limpiar textarea
       setMyComment("");
 
-      // 3) Recargar reseñas
-      const { reviews } = await ReviewsService.list(item.id);
-      setReviews(reviews);
+      // ⬇️ Usa el mismo shape que submitOwnerReply
+      const res = await ReviewsService.list(item.id);
+      setReviews(res.reviews);
+      setCanReply(!!res.canReply);
+      if (res.replyEditWindowMinutes) setReplyWindowMin(res.replyEditWindowMinutes);
 
-      // 4) Refrescar rating/count del servicio (solo locales)
       if (item.source === "serviciospe") {
         const { success, service } = await getLocalServiceDetail(item.id);
         if (success && service) {
-          setItem(prev =>
-            prev ? { ...prev, rating: service.rating } : prev
-          );
+          setItem(prev => (prev ? { ...prev, rating: service.rating } : prev));
         }
       }
     } catch (e: any) {
@@ -391,6 +383,22 @@ export default function ServiceDetailPage() {
               </>
             )}
           </div>
+
+                    {/* Contacto */}
+          {item.contact && (
+            <div style={{ marginTop: 8, display: "grid", gap: 6, fontSize: 14 }}>
+              {item.contact.phone && (
+                <div>📞 <a href={`tel:${item.contact.phone}`}>{item.contact.phone}</a></div>
+              )}
+              {item.contact.email && (
+                <div>✉️ <a href={`mailto:${item.contact.email}`}>{item.contact.email}</a></div>
+              )}
+              {item.contact.website && (
+                <div>🌐 <a href={item.contact.website} target="_blank" rel="noopener noreferrer">{item.contact.website}</a></div>
+              )}
+            </div>
+          )}
+
 
           <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
             {hasOrigin && hasDest ? (

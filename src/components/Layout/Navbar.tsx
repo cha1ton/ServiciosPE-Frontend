@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
+import { BusinessService } from "@/lib/services";
+
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -96,6 +98,24 @@ export default function Navbar() {
     setIsMenuOpen(false);
   };
 
+  const handleViewMyBusiness = async () => {
+  try {
+    const data = await BusinessService.getMyBusiness(); // { success, service }
+    const svc = data?.service;
+    // puede venir como _id o id según tu backend; cubrimos ambos
+    const id = svc?._id || svc?.id;
+    if (id) {
+      router.push(`/service/serviciospe/${id}`);
+      setIsMenuOpen(false);
+    } else {
+      alert("Aún no registraste un negocio.");
+    }
+  } catch {
+    alert("No pudimos abrir tu ficha. ¿Ya registraste tu negocio?");
+  }
+};
+
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
@@ -106,11 +126,11 @@ export default function Navbar() {
 
         {/* Botones de navegación */}
         <div className={styles.actions}>
-          <button
+          <button 
             className={styles.businessButton}
             onClick={handleRegisterBusiness}
           >
-            Mi Negocio
+            {user?.role === 'provider' ? 'Editar mi negocio' : 'Mi Negocio'}
           </button>
 
           {/* Menú de perfil */}
@@ -146,6 +166,13 @@ export default function Navbar() {
                   <button onClick={handleProfile} className={styles.menuItem}>
                     👤 Mi Perfil
                   </button>
+
+                  {user?.role === "provider" && (
+                    <button onClick={handleViewMyBusiness} className={styles.menuItem}>
+                      💬 Ver mi negocio (responder reseñas)
+                    </button>
+                  )}
+
 
                   <button onClick={handleFavorites} className={styles.menuItem}>
                     ❤️ Favoritos
