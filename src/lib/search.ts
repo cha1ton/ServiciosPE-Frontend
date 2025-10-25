@@ -5,8 +5,8 @@ import { api } from "./api";
 export interface SearchParams {
   lat: number;
   lng: number;
-  radius?: number;       // m
-  category?: string;     // restaurante, etc.
+  radius?: number;
+  category?: string;   
   openNow?: boolean;
   q?: string;
   page?: number;

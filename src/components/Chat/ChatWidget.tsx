@@ -4,6 +4,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage, AIService } from "@/lib/ai";
+import { SearchService, SearchItem } from "@/lib/search";
+
 
 type LatLng = { lat: number; lng: number };
 
@@ -72,19 +74,49 @@ export default function ChatWidget({
         systemContext // se envía como metadata para que el backend lo use si quieres
       );
 
-      // Añade respuesta
-      const botMsg: ChatMessage = { role: "assistant", content: resp.message || "…" };
-      setMessages((m) => [...m, botMsg]);
+      //GAAA
 
-      // Si el backend ya parsea una “intención de búsqueda”, úsala:
-      if (resp.action?.type === "search" && onRunSearch) {
-        onRunSearch({
-          q: resp.action.q,
-          category: resp.action.category,
-          distance: resp.action.distance ?? defaultDistance,
-          openNow: !!resp.action.openNow,
-        });
+      // Si hay action: search, NO muestres el texto del LLM; usa la búsqueda real.
+      if (resp.action?.type === "search") {
+        const q = resp.action.q || "";
+        const category = resp.action.category; // deja undefined si no vino
+        const distance = resp.action.distance ?? defaultDistance;
+        const openNow = !!resp.action.openNow;
+
+        // 1) Ejecutar búsqueda aquí mismo
+        if (coords) {
+          const res = await SearchService.search({
+            lat: coords.lat,
+            lng: coords.lng,
+            radius: distance,
+            q,
+            category,
+            openNow,
+            page: 1,
+            limit: 5,
+          });
+
+          // 2) Redactar respuesta con el más cercano
+          if (res.results?.length) {
+            const top: SearchItem = res.results[0];
+            const line = `${top.name}\n${top.address?.formatted || ""}\n${Math.round(top.distanceMeters)} m • ⭐ ${top.rating?.average?.toFixed(1) ?? "0.0"} (${top.rating?.count ?? 0})`;
+            const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${top.coordinates.lat},${top.coordinates.lng}&travelmode=driving`;
+            const summary = `Encontré ${res.results.length} resultado(s). El más cercano:\n\n${line}\n\nCómo llegar: ${dir}`;
+
+            setMessages(m => [...m, { role: "assistant", content: summary }]);
+          } else {
+            setMessages(m => [...m, { role: "assistant", content: "No encontré resultados con esos filtros. ¿Quieres ampliar el radio o quitar “abierto ahora”?" }]);
+          }
+        } else {
+          setMessages(m => [...m, { role: "assistant", content: "No tengo tu ubicación activa. Compártela o dime un distrito/zona para buscar." }]);
+        }
+
+      } else {
+        // No hay acción; ahora sí muestra el texto libre del LLM
+        const botMsg: ChatMessage = { role: "assistant", content: resp.message || "…" };
+        setMessages((m) => [...m, botMsg]);
       }
+
     } catch (e: any) {
       const botMsg: ChatMessage = {
         role: "assistant",
