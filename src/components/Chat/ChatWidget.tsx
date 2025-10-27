@@ -37,6 +37,8 @@ export default function ChatWidget({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  // Evitar repetir siempre el mismo lugar: track de sugerencias por filtros
+  const recommendedRef = useRef<{ key: string; ids: Set<string> }>({ key: "", ids: new Set() });
 
   // Autoscroll
   useEffect(() => {
@@ -98,9 +100,16 @@ export default function ChatWidget({
 
           // 2) Redactar respuesta con el más cercano
           if (res.results?.length) {
-            const top: SearchItem = res.results[0];
+            const resultKey = res.results.map(r => `${r.source}:${r.id}`).join('|');
+            if (recommendedRef.current.key !== resultKey) {
+              recommendedRef.current = { key: resultKey, ids: new Set() };
+            }
+            const top: SearchItem =
+              res.results.find(r => !recommendedRef.current.ids.has(`${r.source}:${r.id}`)) ||
+              res.results[0];
+            recommendedRef.current.ids.add(`${top.source}:${top.id}`);
             const line = `${top.name}\n${top.address?.formatted || ""}\n${Math.round(top.distanceMeters)} m • ⭐ ${top.rating?.average?.toFixed(1) ?? "0.0"} (${top.rating?.count ?? 0})`;
-            const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${top.coordinates.lat},${top.coordinates.lng}&travelmode=driving`;
+            const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${top.coordinates.lat},${top.coordinates.lng}&travelmode=walking`;
             const summary = `Encontré ${res.results.length} resultado(s). El más cercano:\n\n${line}\n\nCómo llegar: ${dir}`;
 
             setMessages(m => [...m, { role: "assistant", content: summary }]);

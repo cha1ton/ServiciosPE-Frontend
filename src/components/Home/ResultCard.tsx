@@ -69,7 +69,7 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
       </div>
 
       <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: 'wrap' }}>
           <h3 style={{ margin: 0 }}>{item.name}</h3>
           <span
             style={{
@@ -82,6 +82,20 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
           >
             Fuente · {item.source === "google" ? "Google" : "ServiciosPE"}
           </span>
+          {item.category ? (
+            <span
+              style={{
+                fontSize: 12,
+                color: "#444",
+                border: "1px solid #ddd",
+                borderRadius: 8,
+                padding: "2px 6px",
+                background: '#f7f7f8'
+              }}
+            >
+              Categoría · {item.category.replace('_',' ')}
+            </span>
+          ) : null}
         </div>
 
         <div style={{ marginTop: 6, fontSize: 14, color: "#444" }}>
