@@ -5,6 +5,7 @@ export interface BusinessFormData {
   name: string;
   description: string;
   category: string;
+  offerings?: string;
   phone: string;
   email: string;
   address: {
@@ -50,6 +51,11 @@ export class BusinessService {
         website: "",
       })
     );
+
+    // Ofrecimientos (opcional)
+    if (formData.offerings) {
+      fd.append("offerings", formData.offerings);
+    }
 
     // Address solo con claves presentes
     const addressPayload: any = {};
@@ -99,6 +105,11 @@ export class BusinessService {
         website: "",
       })
     );
+
+    // Ofrecimientos (opcional)
+    if (formData.offerings) {
+      fd.append("offerings", formData.offerings);
+    }
 
     // Address: solo si hay claves (evita enviar objeto vacío)
     const addressPayload: any = {};

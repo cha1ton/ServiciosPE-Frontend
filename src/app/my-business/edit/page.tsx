@@ -23,6 +23,7 @@ export default function EditMyBusinessPage() {
     name: '',
     description: '',
     category: '',
+    offerings: '',
     phone: '',
     email: '',
     address: {},      // opcional
@@ -54,6 +55,7 @@ export default function EditMyBusinessPage() {
           name: service.name || '',
           description: service.description || '',
           category: service.category || '',
+          offerings: service.offerings || '',
           phone: service.contact?.phone || '',
           email: service.contact?.email || '',
           address: {
@@ -157,16 +159,31 @@ export default function EditMyBusinessPage() {
             <select name="category" value={form.category} onChange={onChange} required>
               <option value="">Selecciona</option>
               <option value="restaurante">Restaurante</option>
+              <option value="comida_bebidas">Cafetería / Panadería / Pastelería</option>
               <option value="centro_salud">Centro de Salud</option>
-              <option value="lavanderia">Lavandería</option>
               <option value="farmacia">Farmacia</option>
+              <option value="veterinaria">Veterinaria / Pet Shop</option>
+              <option value="minimarket">Minimarket</option>
               <option value="supermercado">Supermercado</option>
+              <option value="hotel">Hotel / Hospedaje</option>
+              <option value="gimnasio">Gimnasio</option>
+              <option value="escuela_baile">Escuela de Baile</option>
+              <option value="taller_mecanico">Taller Mecánico</option>
+              <option value="lavanderia">Lavandería</option>
+              <option value="barberia">Barbería</option>
+              <option value="salon_belleza">Salón de Belleza</option>
+              <option value="discoteca">Discoteca / Night Club</option>
               <option value="otros">Otros</option>
             </select>
           </div>
           <div>
             <label>Descripción *</label>
             <textarea name="description" rows={3} value={form.description} onChange={onChange} required />
+          </div>
+          {/* Qué ofreces */}
+          <div>
+            <label>¿Qué ofreces? (palabras clave)</label>
+            <textarea name="offerings" rows={2} value={form.offerings || ''} onChange={onChange} />
           </div>
 
           {/* Contacto */}

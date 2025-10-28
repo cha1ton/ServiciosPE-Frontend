@@ -93,7 +93,7 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
                 background: '#f7f7f8'
               }}
             >
-              Categoría · {item.category.replace('_',' ')}
+              Categoría · {(item.category || '').replaceAll('_',' ')}
             </span>
           ) : null}
         </div>

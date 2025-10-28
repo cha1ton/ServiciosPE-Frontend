@@ -11,10 +11,20 @@ import MapPicker from "@/components/Map/MapPicker";
 
 const CATEGORIES = [
   { value: "restaurante", label: "Restaurante" },
+  { value: "comida_bebidas", label: "Cafetería / Panadería / Pastelería" },
   { value: "centro_salud", label: "Centro de Salud" },
-  { value: "lavanderia", label: "Lavandería" },
   { value: "farmacia", label: "Farmacia" },
+  { value: "veterinaria", label: "Veterinaria / Pet Shop" },
+  { value: "minimarket", label: "Minimarket" },
   { value: "supermercado", label: "Supermercado" },
+  { value: "hotel", label: "Hotel / Hospedaje" },
+  { value: "gimnasio", label: "Gimnasio" },
+  { value: "escuela_baile", label: "Escuela de Baile" },
+  { value: "taller_mecanico", label: "Taller Mecánico" },
+  { value: "lavanderia", label: "Lavandería" },
+  { value: "barberia", label: "Barbería" },
+  { value: "salon_belleza", label: "Salón de Belleza" },
+  { value: "discoteca", label: "Discoteca / Night Club" },
   { value: "otros", label: "Otros" },
 ];
 
@@ -36,6 +46,7 @@ export default function RegisterBusinessPage() {
     name: "",
     description: "",
     category: "",
+    offerings: "",
     phone: "",
     email: "",
     address: {},
@@ -237,21 +248,23 @@ export default function RegisterBusinessPage() {
               </div>
 
               <div>
-                <label>Categoría *</label>
-                <select
-                  name="category"
-                  required
-                  value={formData.category}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <label>Categoría *</label>
+            <select
+              name="category"
+              required
+              value={formData.category}
+              onChange={handleInputChange}
+            >
+              <option value="">Selecciona una categoría</option>
+              {[
+                ...CATEGORIES,
+              ].map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
               <div>
                 <label>Descripción *</label>
@@ -260,6 +273,17 @@ export default function RegisterBusinessPage() {
                   required
                   rows={3}
                   value={formData.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+              {/* Que ofreces */}
+              <div>
+                <label>Que ofreces? (palabras clave)</label>
+                <textarea
+                  name="offerings"
+                  rows={2}
+                  placeholder="Ej: delivery, 24 horas, genericos, promociones, salsa/bachata principiante"
+                  value={formData.offerings}
                   onChange={handleInputChange}
                 />
               </div>
@@ -360,6 +384,7 @@ export default function RegisterBusinessPage() {
                 type="file"
                 multiple
                 accept="image/*"
+                required
                 onChange={handleImageChange}
               />
 

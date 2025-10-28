@@ -104,9 +104,23 @@ export default function ChatWidget({
             if (recommendedRef.current.key !== resultKey) {
               recommendedRef.current = { key: resultKey, ids: new Set() };
             }
-            const top: SearchItem =
-              res.results.find(r => !recommendedRef.current.ids.has(`${r.source}:${r.id}`)) ||
-              res.results[0];
+            // Si el LLM envía un índice, úsalo (0/1-based tolerado)
+            let requestedIndex: number | null = null;
+            try {
+              const anyAction: any = (resp as any).action;
+              if (anyAction && typeof anyAction.index !== 'undefined') {
+                const idx = Number(anyAction.index);
+                if (!Number.isNaN(idx)) requestedIndex = idx >= 1 ? idx - 1 : idx;
+              }
+            } catch {}
+
+            let top: SearchItem | undefined;
+            if (requestedIndex != null && requestedIndex >= 0 && requestedIndex < res.results.length) {
+              top = res.results[requestedIndex];
+            }
+            if (!top) {
+              top = res.results.find(r => !recommendedRef.current.ids.has(`${r.source}:${r.id}`)) || res.results[0];
+            }
             recommendedRef.current.ids.add(`${top.source}:${top.id}`);
             const line = `${top.name}\n${top.address?.formatted || ""}\n${Math.round(top.distanceMeters)} m • ⭐ ${top.rating?.average?.toFixed(1) ?? "0.0"} (${top.rating?.count ?? 0})`;
             const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${top.coordinates.lat},${top.coordinates.lng}&travelmode=walking`;
