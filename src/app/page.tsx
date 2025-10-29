@@ -47,6 +47,14 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Pedir/actualizar ubicación cuando el usuario inicia sesión (cada login)
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      getCurrentLocation();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, isAuthenticated]);
+
   // CTA proveedor / usuario (hooks antes de cualquier return)
   const ctaLabel = useMemo(
     () => (user?.role === "provider" ? "Editar mi negocio" : "Registrar mi negocio"),
