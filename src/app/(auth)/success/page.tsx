@@ -4,19 +4,43 @@
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthService } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 function SuccessInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const { refreshUser } = useAuth();
 
   useEffect(() => {
+    let isCancelled = false;
+    let timeoutId: number | null = null;
+
     const handleSuccess = async () => {
       if (token) {
         AuthService.setToken(token);
         try {
+          await refreshUser();
+        } catch (err) {
+          console.error('Error refrescando usuario tras login:', err);
+          AuthService.removeToken();
+          router.replace('/login');
+          return;
+        }
+
+        const finish = () => {
+          if (!isCancelled) {
+            router.replace('/');
+          }
+        };
+
+        try {
           if (typeof window !== 'undefined' && 'geolocation' in navigator) {
             const done = (coords?: GeolocationCoordinates) => {
+              if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+                timeoutId = null;
+              }
               if (coords) {
                 try {
                   sessionStorage.setItem(
@@ -29,28 +53,35 @@ function SuccessInner() {
                   );
                 } catch {}
               }
-              router.push('/');
+              finish();
             };
+
+            timeoutId = window.setTimeout(() => finish(), 9000);
+
             navigator.geolocation.getCurrentPosition(
               (pos) => done(pos.coords),
               () => done(),
               { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
             );
-            // Fallback si el navegador no responde
-            setTimeout(() => router.push('/'), 9000);
           } else {
-            router.push('/');
+            finish();
           }
         } catch {
-          router.push('/');
+          finish();
         }
       } else {
-        router.push('/login');
+        router.replace('/login');
       }
     };
 
     handleSuccess();
-  }, [token, router]);
+    return () => {
+      isCancelled = true;
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [token, router, refreshUser]);
 
   return (
     <div>

@@ -12,6 +12,7 @@ import ResultCard from "@/components/Home/ResultCard";
 import { SearchItem, SearchService } from "@/lib/search";
 import { setNearbyCache } from '@/lib/searchCache';
 import ChatWidget from "@/components/Chat/ChatWidget";
+import AuthGate from "@/components/AuthGate";
 
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
@@ -32,12 +33,7 @@ export default function HomePage() {
   const [searching, setSearching] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Redirigir a login si no está autenticado
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
-    }
-  }, [loading, isAuthenticated, router]);
+  // Redirecci�n temprana eliminada: AuthGate y el guard con token se encargan
 
   // Pedir ubicación al entrar (una sola vez)
   useEffect(() => {
@@ -131,16 +127,11 @@ export default function HomePage() {
     // Actualiza cuando cambien coords, distancia, categoría u “abierto ahora”
   }, [coordinates?.lat, coordinates?.lng, distance, category, openNow]);
 
-  // Carga / no autenticado
-  if (loading || !isAuthenticated) {
-    return (
-      <div>
-        <p>Cargando...</p>
-      </div>
-    );
-  }
+  // La redirección se maneja en AuthGate y al hidratar el usuario
 
+  // gatea el render mientras hay token pero aún no se hidrata el user
   return (
+    <AuthGate>
     <div>
       <Navbar />
 
@@ -262,5 +253,6 @@ export default function HomePage() {
         </section>
       </main>
     </div>
+    </AuthGate>
   );
 }

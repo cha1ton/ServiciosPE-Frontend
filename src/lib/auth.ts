@@ -79,14 +79,13 @@ export class AuthService {
   return response.data.user!;
 }
 
-  // Cerrar sesión
-  static async logout(): Promise<void> {
+  // src/lib/auth.ts (ejemplo de patrón)
+  static async logout() {
     try {
-      await api.post("/auth/logout");
-    } catch (error) {
-      console.error("Error durante logout:", error);
+      await api.post('/auth/logout').catch(()=>{});
     } finally {
-      this.removeToken();
+      localStorage.removeItem('token'); // o donde lo guardes
+      sessionStorage.removeItem('last_coords');
     }
   }
 }

@@ -5,21 +5,24 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { AuthService } from '@/lib/auth';
 
 export default function LoginPage() {
   const { login, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/');
-    }
-  }, [isAuthenticated, router]);
+  const hasToken = !!AuthService.getToken();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, loading, router]);
+
+  if (loading || hasToken) {
     return (
       <div>
-        <p>Cargando...</p>
+        <p>Iniciando sesión...</p>
       </div>
     );
   }
