@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/lib/auth';
+import Link from "next/link";
 
 export default function LoginPage() {
   const { login, isAuthenticated, loading } = useAuth();
@@ -34,13 +35,14 @@ export default function LoginPage() {
           <h1>ServiciosPE</h1>
           <p>Encuentra servicios cercanos en Perú</p>
         </div>
-        
         <div>
-          <button
-            onClick={login}
-          >
-            Continuar con Google
-          </button>
+          <button onClick={login}>Continuar con Google</button>
+          <p style={{ marginTop: 12, fontSize: 13, color: "#666" }}>
+            Al continuar aceptas nuestra{" "}
+            <Link href="/privacy" style={{ textDecoration: "underline" }}>
+              Política de Privacidad
+            </Link>.
+          </p>
         </div>
       </div>
     </div>

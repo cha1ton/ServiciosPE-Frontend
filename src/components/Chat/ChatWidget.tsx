@@ -5,8 +5,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage, AIService } from "@/lib/ai";
 import { SearchService, SearchItem } from "@/lib/search";
+import AdSlot from '@/components/Ads/AdSlot';
 
 type LatLng = { lat: number; lng: number };
+const CHAT_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_CHAT || '6913128407';
 
 export interface ChatWidgetProps {
   coords?: LatLng | null;
@@ -135,6 +137,13 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     );
   }
 
+  // arriba del return
+  const assistantCount = useMemo(
+    () => messages.filter(m => m.role === 'assistant').length,
+    [messages]
+  );
+
+
   return (
     <section style={{ border: "1px solid #eee", borderRadius: 12, background: "#fff", padding: 12, marginBottom: 12 }}>
       <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
@@ -154,6 +163,18 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
             </div>
           </div>
         ))}
+
+        {/*Anuncio inline: 1er mensaje del bot y luego cada 3 respuestas (1,4,7,...) */}
+        {assistantCount >= 1 && (assistantCount === 1 || assistantCount % 3 === 0) && (
+          <div style={{ margin: '8px 0' }}>
+            <AdSlot
+              slot={String(CHAT_SLOT)}
+              adtest={process.env.NODE_ENV !== 'production'}
+              // clave variable para “repintar” el ad en cada trigger
+              className={`ad-chat-${assistantCount}`}
+            />
+          </div>
+        )}
 
         {sending && (
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
