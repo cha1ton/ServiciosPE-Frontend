@@ -1,7 +1,7 @@
 // src/app/(auth)/success/page.tsx
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthService } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,98 +11,61 @@ function SuccessInner() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const { refreshUser } = useAuth();
+  const ranRef = useRef(false);
 
   useEffect(() => {
-    let isCancelled = false;
-    let timeoutId: number | null = null;
+    if (ranRef.current) return;
+    ranRef.current = true;
 
-    const handleSuccess = async () => {
-      if (token) {
-        AuthService.setToken(token);
-        try {
-          await refreshUser();
-        } catch (err) {
-          console.error('Error refrescando usuario tras login:', err);
-          AuthService.removeToken();
-          router.replace('/login');
-          return;
-        }
+    const handle = async () => {
+      if (!token) { router.replace('/login'); return; }
 
-        const finish = () => {
-          if (!isCancelled) {
-            router.replace('/');
-          }
-        };
+      AuthService.setToken(token);
+      try {
+        await refreshUser(); // llamado 1 sola vez
+      } catch {
+        AuthService.removeToken();
+        router.replace('/login');
+        return;
+      }
 
-        try {
-          if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-            const done = (coords?: GeolocationCoordinates) => {
-              if (timeoutId !== null) {
-                window.clearTimeout(timeoutId);
-                timeoutId = null;
-              }
-              if (coords) {
-                try {
-                  sessionStorage.setItem(
-                    'last_coords',
-                    JSON.stringify({
-                      lat: coords.latitude,
-                      lng: coords.longitude,
-                      ts: Date.now(),
-                    })
-                  );
-                } catch {}
-              }
-              finish();
-            };
+      const finish = () => router.replace('/');
 
-            timeoutId = window.setTimeout(() => finish(), 9000);
-
-            navigator.geolocation.getCurrentPosition(
-              (pos) => done(pos.coords),
-              () => done(),
-              { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-            );
-          } else {
-            finish();
-          }
-        } catch {
+      try {
+        if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+          const tid = window.setTimeout(finish, 9000);
+          navigator.geolocation.getCurrentPosition(
+            pos => { try {
+              sessionStorage.setItem('last_coords', JSON.stringify({
+                lat: pos.coords.latitude, lng: pos.coords.longitude, ts: Date.now(),
+              })); } catch {} 
+              clearTimeout(tid); finish();
+            },
+            () => { clearTimeout(tid); finish(); },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+          );
+        } else {
           finish();
         }
-      } else {
-        router.replace('/login');
+      } catch {
+        finish();
       }
     };
 
-    handleSuccess();
-    return () => {
-      isCancelled = true;
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [token, router, refreshUser]);
+    void handle();
+  }, [token, router]); // ← sin refreshUser aquí
 
   return (
     <div>
-      <div>
-        <h2>Iniciando sesión...</h2>
-        <p>Por favor espera un momento.</p>
-      </div>
+      <h2>Iniciando sesión...</h2>
+      <p>Por favor espera un momento.</p>
     </div>
   );
 }
 
 export default function SuccessPage() {
   return (
-    <Suspense
-      fallback={
-        <div>
-          <h2>Iniciando sesión...</h2>
-          <p>Por favor espera un momento.</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<div><h2>Iniciando sesión...</h2><p>Por favor espera un momento.</p></div>}>
       <SuccessInner />
     </Suspense>
   );

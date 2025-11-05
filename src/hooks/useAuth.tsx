@@ -1,7 +1,7 @@
 // frontend/src/hooks/useAuth.tsx
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { User } from '@/types';
 import { AuthService } from '@/lib/auth';
 
@@ -10,61 +10,56 @@ interface AuthContextType {
   loading: boolean;
   login: () => void;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>; // ← Agregado aquí
-  
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }){
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const token = AuthService.getToken();
       if (token) {
         const userData = await AuthService.verifyAuth();
         setUser(userData);
+      } else {
+        setUser(null);
       }
-    } catch (error) {
-      console.error('Error verificando autenticación:', error);
+    } catch {
       AuthService.removeToken();
+      setUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const login = () => {
+  useEffect(() => { void checkAuth(); }, [checkAuth]);
+
+  const login = useCallback(() => {
     AuthService.loginWithGoogle();
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await AuthService.logout();
     setUser(null);
-  };
+  }, []);
 
-  const refreshUser = async () => {
-    try {
-      const userData = await AuthService.getProfile();
-      setUser(userData);
-      console.log('✅ Usuario refrescado:', userData);
-    } catch (error) {
-      console.error('Error refrescando usuario:', error);
-    }
-  };
+  const refreshUser = useCallback(async () => {
+    const userData = await AuthService.getProfile();
+    setUser(userData);
+    console.log('✅ Usuario refrescado:', userData);
+  }, []);
 
   const value: AuthContextType = {
     user,
     loading,
     login,
     logout,
-    refreshUser, // ← Agregado aquí también
+    refreshUser,
     isAuthenticated: !!user,
   };
 
@@ -72,9 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }){
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+  return ctx;
 }
