@@ -99,22 +99,36 @@ export default function Navbar() {
   };
 
   const handleViewMyBusiness = async () => {
-  try {
-    const data = await BusinessService.getMyBusiness(); // { success, service }
-    const svc = data?.service;
-    // puede venir como _id o id según tu backend; cubrimos ambos
-    const id = svc?._id || svc?.id;
-    if (id) {
-      router.push(`/service/serviciospe/${id}`);
-      setIsMenuOpen(false);
-    } else {
-      alert("Aún no registraste un negocio.");
+    try {
+      const data = await BusinessService.getMyBusiness(); // { success, service }
+      const svc = data?.service;
+      // puede venir como _id o id según tu backend; cubrimos ambos
+      const id = svc?._id || svc?.id;
+      if (id) {
+        router.push(`/service/serviciospe/${id}`);
+        setIsMenuOpen(false);
+      } else {
+        alert("Aún no registraste un negocio.");
+      }
+    } catch {
+      alert("No pudimos abrir tu ficha. ¿Ya registraste tu negocio?");
     }
-  } catch {
-    alert("No pudimos abrir tu ficha. ¿Ya registraste tu negocio?");
-  }
-};
+  };
 
+  const handleAbout = () => {
+    router.push("/info/quienes-somos");
+    setIsMenuOpen(false);
+  };
+
+  const handleHowItWorks = () => {
+    router.push("/info/como-funciona");
+    setIsMenuOpen(false);
+  };
+
+  const handleContact = () => {
+    router.push("/info/contacto");
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className={styles.navbar}>
@@ -177,6 +191,18 @@ export default function Navbar() {
                   <button onClick={handleFavorites} className={styles.menuItem}>
                     ❤️ Favoritos
                   </button>
+                  <hr className={styles.divider} />
+
+                  <button onClick={handleAbout} className={styles.menuItem}>
+                    ℹ️ Quiénes somos
+                  </button>
+                  <button onClick={handleHowItWorks} className={styles.menuItem}>
+                    ⚙️ Cómo funciona
+                  </button>
+                  <button onClick={handleContact} className={styles.menuItem}>
+                    ✉️ Contacto
+                  </button>
+
                   <hr className={styles.divider} />
 
                   <button
