@@ -131,33 +131,11 @@ export default function HomePage() {
 
   // gatea el render mientras hay token pero aún no se hidrata el user
   return (
-    <AuthGate>
+    
     <div>
       <Navbar />
 
       <main style={{ padding: "16px", maxWidth: 960, margin: "0 auto" }}>
-        <header style={{ marginBottom: 12 }}>
-          <h1 style={{ margin: 0 }}>Bienvenido, {user?.nickname || user?.name}!</h1>
-          <p style={{ margin: "6px 0 0", color: "#555" }}>
-            Encuentra servicios cercanos en Perú. Precisión primero: tu ubicación es la base.
-          </p>
-        </header>
-
-        {/* CTA proveedor / usuario */}
-        <div style={{ margin: "12px 0 16px" }}>
-          <button
-            onClick={() => router.push(ctaHref)}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 10,
-              border: "1px solid #ddd",
-              background: "#f7f7f8",
-              cursor: "pointer",
-            }}
-          >
-            {ctaLabel} →
-          </button>
-        </div>
 
         {/* Estado de geolocalización */}
         <div
@@ -253,6 +231,6 @@ export default function HomePage() {
         </section>
       </main>
     </div>
-    </AuthGate>
+    
   );
 }
