@@ -21,6 +21,7 @@ export default function RootLayout({
     <head>
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9134955448129642"
      crossOrigin="anonymous"></script>
+     <meta name="monetag" content="f768e4c599b7f4b46527a66efd52ddc2"></meta>
     </head>
       <body className={inter.className}>
         <AuthProvider>
