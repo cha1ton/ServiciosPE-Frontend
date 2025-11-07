@@ -26,5 +26,22 @@ export const ReviewsService = {
     const { data } = await api.post(`/reviews/reply/${reviewId}`, { text });
     return data;
   },
+  // Obtener respuestas no leídas para el usuario
+  async unread() {
+    const { data } = await api.get(`/reviews/unread`);
+    // data.items: [{ type: 'owner_reply'|'new_review', ... }]
+    return data as { success: boolean; items: any[]; count: number };
+  },
+  // Marcar respuesta como leída
+  async markRead(reviewId: string) {
+    const { data } = await api.post(`/reviews/mark-read/${reviewId}`);
+    return data;
+  }
+  ,
+  // Marcar vista por owner
+  async markOwnerSeen(reviewId: string) {
+    const { data } = await api.post(`/reviews/mark-owner-seen/${reviewId}`);
+    return data;
+  }
 };
 

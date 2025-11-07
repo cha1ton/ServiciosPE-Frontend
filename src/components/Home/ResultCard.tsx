@@ -110,11 +110,11 @@ export default function ResultCard({ item, origin }: { item: SearchItem; origin?
           {item.rating?.average?.toFixed(1) ?? "0"} ({item.rating?.count ?? 0})
         </div>
 
-        {item.contact?.phone && (
+        {/* {item.contact?.phone && (
           <div style={{ marginTop: 6, fontSize: 13, color: "#555" }}>
             📞 {item.contact.phone}
           </div>
-        )}
+        )} */}
 
         {/* Controles: botones separados, sin conflicto de clic */}
         <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
