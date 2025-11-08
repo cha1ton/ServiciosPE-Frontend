@@ -12,7 +12,11 @@ import ResultCard from "@/components/Home/ResultCard";
 import { SearchItem, SearchService } from "@/lib/search";
 import { setNearbyCache } from '@/lib/searchCache';
 import ChatWidget from "@/components/Chat/ChatWidget";
-import AuthGate from "@/components/AuthGate";
+// import AuthGate from "@/components/AuthGate";
+import DirectLinkCard from "@/components/Ads/DirectLinkCard";
+
+const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER;
+const DIRECT_LINK_FEED = process.env.NEXT_PUBLIC_MONETAG_DIRECT_FEED ?? "";
 
 type DistanceOption = 500 | 1000 | 2000 | 5000;
 
@@ -225,8 +229,19 @@ export default function HomePage() {
             </div>
           )}
 
-          {results.map((it) => (
-            <ResultCard key={it.id} item={it} origin={coordinates ?? undefined} />
+          {results.map((item, i) => (
+            <div key={`${item.source}:${item.id}`}>
+              <ResultCard item={item} origin={coordinates ?? undefined} />
+              {provider === "monetag" && i === 2 && (
+                <div style={{ margin: "12px 0" }}>
+                  <DirectLinkCard
+                    href={DIRECT_LINK_FEED}
+                    title="Publicidad recomendada"
+                    text="Anuncio relevante para tu búsqueda."
+                  />
+                </div>
+              )}
+            </div>
           ))}
         </section>
       </main>

@@ -6,6 +6,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage, AIService } from "@/lib/ai";
 import { SearchService, SearchItem } from "@/lib/search";
 import AdSlot from '@/components/Ads/AdSlot';
+import DirectLinkCard from "@/components/Ads/DirectLinkCard";
+
+const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER;
+const DIRECT_LINK_CHAT = process.env.NEXT_PUBLIC_MONETAG_DIRECT_CHAT ?? ""; // pon tu URL
 
 type LatLng = { lat: number; lng: number };
 const CHAT_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_CHAT || '6913128407';
@@ -165,13 +169,23 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
         ))}
 
         {/*Anuncio inline: 1er mensaje del bot y luego cada 3 respuestas (1,4,7,...) */}
-        {assistantCount >= 1 && (assistantCount === 1 || assistantCount % 3 === 0) && (
+        {/* anuncio inline del chat */}
+        {provider === 'adsense' && assistantCount >= 1 && (assistantCount === 1 || assistantCount % 3 === 0) && (
           <div style={{ margin: '8px 0' }}>
             <AdSlot
               slot={String(CHAT_SLOT)}
               adtest={process.env.NODE_ENV !== 'production'}
-              // clave variable para “repintar” el ad en cada trigger
               className={`ad-chat-${assistantCount}`}
+            />
+          </div>
+        )}
+
+        {provider === 'monetag' && assistantCount >= 1 && (
+          <div style={{ margin: '8px 0' }}>
+            <DirectLinkCard
+              href={DIRECT_LINK_CHAT}
+              title="Oferta cerca de ti"
+              text="Descubre promociones locales seleccionadas."
             />
           </div>
         )}
