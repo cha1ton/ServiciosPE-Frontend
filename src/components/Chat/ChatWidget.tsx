@@ -3,13 +3,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 import { ChatMessage, AIService } from "@/lib/ai";
 import { SearchService, SearchItem } from "@/lib/search";
 import AdSlot from '@/components/Ads/AdSlot';
 import DirectLinkCard from "@/components/Ads/DirectLinkCard";
+import type { ReactNode } from "react";
 
 const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER;
-const DIRECT_LINK_CHAT = process.env.NEXT_PUBLIC_MONETAG_DIRECT_CHAT ?? ""; // pon tu URL
+const DIRECT_LINK_CHAT = process.env.NEXT_PUBLIC_MONETAG_DIRECT_CHAT ?? "";
 
 type LatLng = { lat: number; lng: number };
 const CHAT_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_CHAT || '6913128407';
@@ -22,8 +25,10 @@ export interface ChatWidgetProps {
 }
 
 export default function ChatWidget({ coords, defaultDistance, initialCategory = "", onRunSearch }: ChatWidgetProps) {
+  const { user, login } = useAuth();
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Hola! Soy tu asistente de ServiciosPE. Dime que necesitas (ej. 'una farmacia abierta cerca', 'lavanderia economica a 500 m')." }
+    { role: "assistant", content: "Hola, soy tu asistente de ServiciosPE. Dime qué necesitas (ej.: 'farmacia cerca', 'restaurante')."}
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -42,6 +47,12 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
   async function sendText() {
     const text = input.trim();
     if (!text || sending) return;
+
+    // prevenir uso si no hay sesión
+    if (!user) {
+      setMessages(m => [...m, { role: 'assistant', content: 'Debes iniciar sesión para usar el chatbot.' }]);
+      return;
+    }
 
     const userMsg: ChatMessage = { role: "user", content: text };
     setMessages((m) => [...m, userMsg]);
@@ -101,7 +112,8 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
             const lines = picks.map((p, i) => {
               const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${p.coordinates.lat},${p.coordinates.lng}&travelmode=walking`;
               const info = `${p.name}\n${p.address?.formatted || ''}\n${Math.round(p.distanceMeters)} m • ★ ${p.rating?.average?.toFixed(1) ?? '0.0'} (${p.rating?.count ?? 0})`;
-              return `${i + 1}. ${info}\n\nComo llegar: ${dir}`;
+              // return `${i + 1}. ${info}\n\nComo llegar: ${dir}`;
+              return `${i + 1}. ${info}\n\n[Como llegar →](${dir})`;
             });
 
             const header = want > 1 ? `Top ${picks.length}` : `Recomendacion`;
@@ -132,14 +144,43 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
   }
 
   // Convierte URLs en anchors clicables al renderizar mensajes
+  // function linkify(text: string) {
+  //   const urlRegex = /(https?:\/\/[^\s]+)/g;
+  //   const parts = text.split(urlRegex);
+  //   return parts.map((part, i) => urlRegex.test(part)
+  //     ? (<a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>)
+  //     : (<span key={i}>{part}</span>)
+  //   );
+  // }
+
   function linkify(text: string) {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
-    return parts.map((part, i) => urlRegex.test(part)
-      ? (<a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>)
-      : (<span key={i}>{part}</span>)
+    // 1) Markdown [label](url)
+    const md = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    const parts: ReactNode[] = [];
+    let lastIndex = 0, m: RegExpExecArray | null;
+
+    while ((m = md.exec(text)) !== null) {
+      if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
+      parts.push(
+        <a key={`md-${parts.length}`} href={m[2]} target="_blank" rel="noopener noreferrer">
+          {m[1]}
+        </a>
+      );
+      lastIndex = md.lastIndex;
+    }
+    const rest = text.slice(lastIndex);
+
+    // 2) Autolink para URLs sueltas
+    const url = /(https?:\/\/[^\s]+)/g; // con () para que split mantenga los matches
+    const restParts = rest.split(url).map((chunk, i) =>
+      i % 2 === 1
+        ? <a key={`u-${i}`} href={chunk} target="_blank" rel="noopener noreferrer">{chunk}</a>
+        : <span key={`t-${i}`}>{chunk}</span>
     );
+
+    return [...parts, ...restParts];
   }
+
 
   // arriba del return
   const assistantCount = useMemo(
@@ -150,6 +191,15 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
 
   return (
     <section style={{ border: "1px solid #eee", borderRadius: 12, background: "#fff", padding: 12, marginBottom: 12 }}>
+      {/* Banner si no hay usuario */}
+      {!user && (
+        <div style={{ background: '#fff7e6', border: '1px solid #ffe0b2', padding: 10, borderRadius: 8, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ color: '#663c00' }}>Inicia sesión para usar el chatbot.</div>
+          <div>
+            <button onClick={() => login()} style={{ marginRight: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #e6b800', background: '#ffecb3', cursor: 'pointer' }}>Iniciar sesión</button>
+          </div>
+        </div>
+      )}
       <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
         <h3 style={{ margin: 0 }}>Asistente</h3>
         <span style={{ fontSize: 12, color: "#666" }}>

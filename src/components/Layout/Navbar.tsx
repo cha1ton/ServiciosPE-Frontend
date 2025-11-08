@@ -175,6 +175,11 @@ export default function Navbar() {
     setIsMenuOpen(false);
   };
 
+  const handlePrivacy = () => {
+    router.push('/privacy');
+    setIsMenuOpen(false);
+  };
+
   const handleHowItWorks = () => {
     router.push("/info/como-funciona");
     setIsMenuOpen(false);
@@ -279,6 +284,10 @@ export default function Navbar() {
                     ❤️ Favoritos
                   </button>
                   <hr className={styles.divider} />
+
+                  <button onClick={handlePrivacy} className={styles.menuItem}>
+                    🔒 Política de Privacidad
+                  </button>
 
                   <button onClick={handleAbout} className={styles.menuItem}>
                     ℹ️ Quiénes somos

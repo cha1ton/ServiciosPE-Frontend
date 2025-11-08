@@ -2,7 +2,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import BackButton from "@/components/BackButton";
 
 export const metadata: Metadata = {
   title: "Cómo funciona - ServiciosPE",
