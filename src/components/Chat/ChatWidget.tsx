@@ -9,7 +9,9 @@ import { ChatMessage, AIService } from "@/lib/ai";
 import { SearchService, SearchItem } from "@/lib/search";
 import AdSlot from '@/components/Ads/AdSlot';
 import DirectLinkCard from "@/components/Ads/DirectLinkCard";
+import { MessageCircle, Send, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import type { ReactNode } from "react";
+import styles from './chat.module.css';
 
 const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER;
 const DIRECT_LINK_CHAT = process.env.NEXT_PUBLIC_MONETAG_DIRECT_CHAT ?? "";
@@ -27,16 +29,15 @@ export interface ChatWidgetProps {
 export default function ChatWidget({ coords, defaultDistance, initialCategory = "", onRunSearch }: ChatWidgetProps) {
   const { user, login } = useAuth();
   const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Hola, soy tu asistente de ServiciosPE. Dime qué necesitas (ej.: 'farmacia cerca', 'restaurante')."}
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  // Evitar repetir: track de sugerencias por conjunto de resultados
   const recommendedRef = useRef<{ key: string; ids: Set<string> }>({ key: "", ids: new Set() });
 
-  // Autoscroll
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
   const systemContext = useMemo(() => ({
@@ -48,7 +49,6 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     const text = input.trim();
     if (!text || sending) return;
 
-    // prevenir uso si no hay sesión
     if (!user) {
       setMessages(m => [...m, { role: 'assistant', content: 'Debes iniciar sesión para usar el chatbot.' }]);
       return;
@@ -77,7 +77,6 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
               recommendedRef.current = { key: resultKey, ids: new Set() };
             }
 
-            // index opcional desde el LLM (0 o 1-based)
             let requestedIndex: number | null = null;
             try {
               const anyAction: any = (resp as any).action;
@@ -87,12 +86,11 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
               }
             } catch {}
 
-            // Pedidos tipo "muestrame 3" (top-N)
             const lower = text.toLowerCase();
             const numberWords: Record<string, number> = { 'dos': 2, 'tres': 3, '3': 3, '2': 2, 'top 3': 3 };
             let want = 1;
             for (const [k, v] of Object.entries(numberWords)) { if (lower.includes(k)) { want = Math.min(3, Math.max(1, v)); break; } }
-            if (requestedIndex != null) want = 1; // si se pide index especifico, solo 1
+            if (requestedIndex != null) want = 1;
 
             const picks: SearchItem[] = [];
             if (requestedIndex != null && requestedIndex >= 0 && requestedIndex < res.results.length) {
@@ -103,7 +101,7 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
               const key = `${r.source}:${r.id}`;
               if (!recommendedRef.current.ids.has(key)) picks.push(r);
             }
-            for (const r of res.results) { // completar si hiciera falta
+            for (const r of res.results) {
               if (picks.length >= want) break;
               if (!picks.find(p => p.id === r.id && p.source === r.source)) picks.push(r);
             }
@@ -112,7 +110,6 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
             const lines = picks.map((p, i) => {
               const dir = `https://www.google.com/maps/dir/?api=1&origin=${coords.lat},${coords.lng}&destination=${p.coordinates.lat},${p.coordinates.lng}&travelmode=walking`;
               const info = `${p.name}\n${p.address?.formatted || ''}\n${Math.round(p.distanceMeters)} m • ★ ${p.rating?.average?.toFixed(1) ?? '0.0'} (${p.rating?.count ?? 0})`;
-              // return `${i + 1}. ${info}\n\nComo llegar: ${dir}`;
               return `${i + 1}. ${info}\n\n[Como llegar →](${dir})`;
             });
 
@@ -143,18 +140,7 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     if (e.key === "Enter") { e.preventDefault(); sendText(); }
   }
 
-  // Convierte URLs en anchors clicables al renderizar mensajes
-  // function linkify(text: string) {
-  //   const urlRegex = /(https?:\/\/[^\s]+)/g;
-  //   const parts = text.split(urlRegex);
-  //   return parts.map((part, i) => urlRegex.test(part)
-  //     ? (<a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>)
-  //     : (<span key={i}>{part}</span>)
-  //   );
-  // }
-
   function linkify(text: string) {
-    // 1) Markdown [label](url)
     const md = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
     const parts: ReactNode[] = [];
     let lastIndex = 0, m: RegExpExecArray | null;
@@ -162,7 +148,7 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     while ((m = md.exec(text)) !== null) {
       if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
       parts.push(
-        <a key={`md-${parts.length}`} href={m[2]} target="_blank" rel="noopener noreferrer">
+        <a key={`md-${parts.length}`} href={m[2]} target="_blank" rel="noopener noreferrer" className={styles.link}>
           {m[1]}
         </a>
       );
@@ -170,97 +156,133 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     }
     const rest = text.slice(lastIndex);
 
-    // 2) Autolink para URLs sueltas
-    const url = /(https?:\/\/[^\s]+)/g; // con () para que split mantenga los matches
+    const url = /(https?:\/\/[^\s]+)/g;
     const restParts = rest.split(url).map((chunk, i) =>
       i % 2 === 1
-        ? <a key={`u-${i}`} href={chunk} target="_blank" rel="noopener noreferrer">{chunk}</a>
+        ? <a key={`u-${i}`} href={chunk} target="_blank" rel="noopener noreferrer" className={styles.link}>{chunk}</a>
         : <span key={`t-${i}`}>{chunk}</span>
     );
 
     return [...parts, ...restParts];
   }
 
-
-  // arriba del return
   const assistantCount = useMemo(
     () => messages.filter(m => m.role === 'assistant').length,
     [messages]
   );
 
-
   return (
-    <section style={{ border: "1px solid #eee", borderRadius: 12, background: "#fff", padding: 12, marginBottom: 12 }}>
-      {/* Banner si no hay usuario */}
-      {!user && (
-        <div style={{ background: '#fff7e6', border: '1px solid #ffe0b2', padding: 10, borderRadius: 8, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ color: '#663c00' }}>Inicia sesión para usar el chatbot.</div>
-          <div>
-            <button onClick={() => login()} style={{ marginRight: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #e6b800', background: '#ffecb3', cursor: 'pointer' }}>Iniciar sesión</button>
+    <section className={styles.chatWidget}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.headerIcon}>
+            <MessageCircle size={20} />
+          </div>
+          <div className={styles.headerInfo}>
+            <h3 className={styles.headerTitle}>Asistente</h3>
+            <div className={styles.headerStatus}>
+              {coords ? (
+                <>
+                  <MapPin size={12} />
+                  <span>Ubicación: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)} • Radio: {defaultDistance}m</span>
+                </>
+              ) : (
+                <span>Sin ubicación</span>
+              )}
+            </div>
           </div>
         </div>
-      )}
-      <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-        <h3 style={{ margin: 0 }}>Asistente</h3>
-        <span style={{ fontSize: 12, color: "#666" }}>
-          {coords ? `Ubicacion: ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}` : "Sin ubicacion"}
-          {" • "}
-          Radio: {defaultDistance} m
-        </span>
-      </div>
-
-      <div ref={listRef} style={{ height: 200, overflowY: "auto", padding: 8, border: "1px solid #f0f0f0", borderRadius: 8, background: "#fafafa" }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 8 }}>
-            <div style={{ maxWidth: "80%", padding: "8px 10px", borderRadius: 12, background: m.role === "user" ? "#dff1ff" : "#fff", border: "1px solid #e6e6e6", whiteSpace: "pre-wrap" }}>
-              {linkify(m.content)}
-            </div>
-          </div>
-        ))}
-
-        {/*Anuncio inline: 1er mensaje del bot y luego cada 3 respuestas (1,4,7,...) */}
-        {/* anuncio inline del chat */}
-        {provider === 'adsense' && assistantCount >= 1 && (assistantCount === 1 || assistantCount % 3 === 0) && (
-          <div style={{ margin: '8px 0' }}>
-            <AdSlot
-              slot={String(CHAT_SLOT)}
-              adtest={process.env.NODE_ENV !== 'production'}
-              className={`ad-chat-${assistantCount}`}
-            />
-          </div>
-        )}
-
-        {provider === 'monetag' && assistantCount >= 1 && (
-          <div style={{ margin: '8px 0' }}>
-            <DirectLinkCard
-              href={DIRECT_LINK_CHAT}
-              title="Oferta cerca de ti"
-              text="Descubre promociones locales seleccionadas."
-            />
-          </div>
-        )}
-
-        {sending && (
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
-            <div style={{ maxWidth: '80%', padding: '8px 10px', borderRadius: 12, background: '#fff', border: '1px solid #e6e6e6', color: '#666', fontSize: 13 }}>
-              Buscando...
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder="Escribe tu consulta..."
-          style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", outline: "none" }}
-        />
-        <button onClick={sendText} disabled={sending || !input.trim()} style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #ddd", background: sending ? "#eee" : "#f7f7f8", cursor: sending ? "not-allowed" : "pointer" }}>
-          Enviar
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={styles.collapseButton}
+          aria-label={isCollapsed ? "Expandir" : "Contraer"}
+        >
+          {isCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
         </button>
       </div>
+
+      {/* Banner de login */}
+      {!user && !isCollapsed && (
+        <div className={styles.loginBanner}>
+          <div className={styles.loginBannerText}>
+            Inicia sesión para usar el chatbot
+          </div>
+          <button onClick={() => login()} className={styles.loginButton}>
+            Iniciar sesión
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
+      {!isCollapsed && (
+        <>
+          {/* Messages */}
+          <div ref={listRef} className={styles.messagesList}>
+            {messages.map((m, i) => (
+              <div 
+                key={i} 
+                className={`${styles.messageWrapper} ${m.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
+              >
+                <div className={styles.messageBubble}>
+                  {linkify(m.content)}
+                </div>
+              </div>
+            ))}
+
+            {/* Ads */}
+            {provider === 'adsense' && assistantCount >= 1 && (assistantCount === 1 || assistantCount % 3 === 0) && (
+              <div className={styles.adContainer}>
+                <AdSlot
+                  slot={String(CHAT_SLOT)}
+                  adtest={process.env.NODE_ENV !== 'production'}
+                  className={`ad-chat-${assistantCount}`}
+                />
+              </div>
+            )}
+
+            {provider === 'monetag' && assistantCount >= 1 && (
+              <div className={styles.adContainer}>
+                <DirectLinkCard
+                  href={DIRECT_LINK_CHAT}
+                  title="Oferta cerca de ti"
+                  text="Descubre promociones locales seleccionadas."
+                />
+              </div>
+            )}
+
+            {sending && (
+              <div className={`${styles.messageWrapper} ${styles.assistantMessage}`}>
+                <div className={`${styles.messageBubble} ${styles.loadingBubble}`}>
+                  <span className={styles.loadingDot}></span>
+                  <span className={styles.loadingDot}></span>
+                  <span className={styles.loadingDot}></span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className={styles.inputContainer}>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Escribe tu consulta..."
+              className={styles.input}
+              disabled={!user}
+            />
+            <button 
+              onClick={sendText} 
+              disabled={sending || !input.trim() || !user}
+              className={styles.sendButton}
+              aria-label="Enviar mensaje"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+        </>
+      )}
     </section>
   );
 }

@@ -1,114 +1,164 @@
+/* ===== CONTENEDOR PRINCIPAL ===== */
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .main {
-  max-width: 600px;
+  padding: 100px 20px 40px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
 }
 
+/* ===== LOADING ===== */
+.loadingContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* ===== TARJETA DE PERFIL ===== */
 .profileCard {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
+/* ===== TÍTULO PRINCIPAL ===== */
 .title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 25px;
-  color: #333;
-  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding: 40px 40px 20px;
+  margin: 0;
+  border-bottom: 3px solid #f0f0f0;
+  background: linear-gradient(135deg, #34a853 0%, #4285f4 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+/* ===== MENSAJES ===== */
 .message {
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  margin: 20px 40px 0;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.95rem;
   font-weight: 500;
-  text-align: center;
 }
 
 .success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #34a853;
 }
 
 .error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #ea4335;
+}
+
+/* ===== FORMULARIO ===== */
+.form {
+  padding: 30px 40px;
 }
 
 .section {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.section:last-of-type {
-  border-bottom: none;
+  margin-bottom: 40px;
 }
 
 .sectionTitle {
-  font-size: 18px;
+  font-size: 1.3rem;
   font-weight: 600;
+  color: #1a1a1a;
   margin-bottom: 20px;
-  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.sectionTitle::before {
+  content: "";
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(135deg, #34a853, #4285f4);
+  border-radius: 2px;
+}
+
+/* ===== CAMPOS ===== */
 .fields {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 20px;
 }
 
 .label {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 8px;
 }
 
-.input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
+.input,
+.disabledInput {
   width: 100%;
-  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
 }
 
 .input:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
 }
 
 .disabledInput {
-  background-color: #f8f9fa;
-  color: #6c757d;
+  background: #f8f9fa;
+  color: #999;
   cursor: not-allowed;
 }
 
+.helpText {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ===== FOTO DE PERFIL ===== */
 .photoSection {
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .photoContainer {
   display: flex;
   align-items: center;
-  gap: 25px;
-  margin-top: 10px;
+  gap: 30px;
+  padding: 24px;
+  background: #f8fafb;
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.photoContainer:hover {
+  border-color: #4285f4;
+  background: #f0f7ff;
 }
 
 .photoPreview {
@@ -116,11 +166,12 @@
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #ddd;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .photoUpload {
@@ -129,112 +180,195 @@
 
 .fileInput {
   width: 100%;
-  margin-bottom: 8px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.helpText {
-  font-size: 12px;
-  color: #666;
-  margin-top: 5px;
-  line-height: 1.4;
+.fileInput:hover {
+  border-color: #4285f4;
 }
 
+.fileInput::file-selector-button {
+  padding: 8px 16px;
+  margin-right: 12px;
+  background: linear-gradient(135deg, #34a853, #4285f4);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.fileInput::file-selector-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+/* ===== BOTONES ===== */
 .actions {
+  padding: 20px 40px 40px;
+  border-top: 1px solid #f0f0f0;
   display: flex;
-  justify-content: center;
-  margin-top: 30px;
+  justify-content: flex-end;
 }
 
 .saveButton {
-  padding: 12px 30px;
-  background-color: #28a745;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #34a853, #4285f4);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  min-width: 150px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.25);
 }
 
 .saveButton:hover:not(:disabled) {
-  background-color: #1e7e34;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 168, 83, 0.35);
+}
+
+.saveButton:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .saveButton:disabled {
-  background-color: #6c757d;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* ===== INFORMACIÓN ADICIONAL ===== */
 .infoSection {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  padding: 30px 40px 40px;
+  background: #f8fafb;
+  border-top: 1px solid #f0f0f0;
 }
 
 .infoTitle {
-  font-size: 16px;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 15px;
-  color: #333;
+  color: #1a1a1a;
+  margin-bottom: 16px;
 }
 
 .infoGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
 }
 
 .infoItem {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e8eef3;
+  border-radius: 10px;
 }
 
 .infoLabel {
-  font-size: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #666;
-  margin-bottom: 4px;
 }
 
 .infoValue {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+  border-radius: 6px;
 }
 
-.loadingContainer {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-
-/* Responsive */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .main {
-    padding: 10px;
+    padding: 80px 10px 30px;
   }
-  
-  .profileCard {
-    padding: 20px;
+
+  .title {
+    font-size: 1.75rem;
+    padding: 30px 24px 16px;
   }
-  
+
+  .message {
+    margin: 16px 24px 0;
+  }
+
+  .form {
+    padding: 24px;
+  }
+
+  .fields {
+    grid-template-columns: 1fr;
+  }
+
   .photoContainer {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    text-align: center;
   }
-  
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .actions {
+    padding: 16px 24px 30px;
+  }
+
+  .saveButton {
+    width: 100%;
+  }
+
+  .infoSection {
+    padding: 24px;
+  }
+
   .infoGrid {
     grid-template-columns: 1fr;
   }
-  
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+    padding: 24px 20px 14px;
+  }
+
+  .form {
+    padding: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 1.15rem;
+  }
+
   .avatar {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
+  }
+
+  .photoContainer {
+    padding: 20px;
+  }
+
+  .actions {
+    padding: 16px 20px 24px;
+  }
+
+  .infoSection {
+    padding: 20px;
   }
 }

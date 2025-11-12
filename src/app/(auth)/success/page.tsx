@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthService } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
+import styles from './page.module.css';
 
 function SuccessInner() {
   const router = useRouter();
@@ -22,7 +23,7 @@ function SuccessInner() {
 
       AuthService.setToken(token);
       try {
-        await refreshUser(); // llamado 1 sola vez
+        await refreshUser();
       } catch {
         AuthService.removeToken();
         router.replace('/login');
@@ -53,19 +54,49 @@ function SuccessInner() {
     };
 
     void handle();
-  }, [token, router]); // ← sin refreshUser aquí
+  }, [token, router]);
 
   return (
-    <div>
-      <h2>Iniciando sesión...</h2>
-      <p>Por favor espera un momento.</p>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.iconContainer}>
+          <img 
+            src="https://cdn-icons-gif.flaticon.com/6844/6844338.gif" 
+            alt="Ubicación" 
+            className={styles.locationGif}
+          />
+        </div>
+
+        <h2 className={styles.title}>Iniciando sesión...</h2>
+        <p className={styles.subtitle}>Estamos preparando todo para ti</p>
+
+        <div className={styles.progressBar}>
+          <div className={styles.progressFill}></div>
+        </div>
+
+        <p className={styles.hint}>Detectando tu ubicación para mejores resultados</p>
+      </div>
     </div>
   );
 }
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div><h2>Iniciando sesión...</h2><p>Por favor espera un momento.</p></div>}>
+    <Suspense fallback={
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.iconContainer}>
+            <img 
+              src="https://cdn-icons-gif.flaticon.com/6844/6844338.gif" 
+              alt="Ubicación" 
+              className={styles.locationGif}
+            />
+          </div>
+          <h2 className={styles.title}>Iniciando sesión...</h2>
+          <p className={styles.subtitle}>Por favor espera un momento</p>
+        </div>
+      </div>
+    }>
       <SuccessInner />
     </Suspense>
   );

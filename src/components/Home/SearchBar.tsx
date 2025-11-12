@@ -2,6 +2,8 @@
 "use client";
 
 import React from "react";
+import { Search, MapPin } from "lucide-react";
+import styles from './home.module.css';
 
 type Distance = 500 | 1000 | 2000 | 5000;
 
@@ -27,63 +29,51 @@ export default function SearchBar({
   disabled,
 }: Props) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr",
-        gap: 8,
-        padding: 12,
-        border: "1px solid #eee",
-        borderRadius: 12,
-        background: "#fff",
-      }}
-    >
-      <input
-        type="text"
-        placeholder="¿Qué buscas? (ej: restaurante, farmacia, lavandería)"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px 12px",
-          borderRadius: 10,
-          border: "1px solid #ddd",
-          outline: "none",
-        }}
-      />
+    <div className={styles.searchBar}>
+      <div className={styles.searchInputWrapper}>
+        <Search className={styles.searchIcon} size={20} />
+        <input
+          type="text"
+          placeholder="¿Qué buscas? (ej: restaurante, farmacia, lavandería)"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <select
-          value={distance}
-          onChange={(e) => onDistanceChange(Number(e.target.value) as Distance)}
-          style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #ddd" }}
-        >
-          <option value={500}>500 m</option>
-          <option value={1000}>1 km</option>
-          <option value={2000}>2 km</option>
-          <option value={5000}>5 km</option>
-        </select>
+      <div className={styles.searchFilters}>
+        <div className={styles.filterGroup}>
+          <MapPin size={16} className={styles.filterIcon} />
+          <select
+            value={distance}
+            onChange={(e) => onDistanceChange(Number(e.target.value) as Distance)}
+            className={styles.distanceSelect}
+          >
+            <option value={500}>500 m</option>
+            <option value={1000}>1 km</option>
+            <option value={2000}>2 km</option>
+            <option value={5000}>5 km</option>
+          </select>
+        </div>
 
-        <label style={{ display: "inline-flex", gap: 6, alignItems: "center", fontSize: 14 }}>
-          <input type="checkbox" checked={openNow} onChange={(e) => onToggleOpen(e.target.checked)} />
-          Abierto ahora
+        <label className={styles.checkboxLabel}>
+          <input 
+            type="checkbox" 
+            checked={openNow} 
+            onChange={(e) => onToggleOpen(e.target.checked)}
+            className={styles.checkbox}
+          />
+          <span>Abierto ahora</span>
         </label>
-
-        <div style={{ flex: 1 }} />
 
         <button
           onClick={onSubmit}
           disabled={disabled}
-          style={{
-            padding: "10px 14px",
-            borderRadius: 10,
-            border: "1px solid #ddd",
-            background: disabled ? "#eee" : "#f7f7f8",
-            cursor: disabled ? "not-allowed" : "pointer",
-          }}
+          className={styles.searchButton}
           title={disabled ? "Primero permite ubicación" : "Buscar"}
         >
-          Buscar
+          <Search size={18} />
+          <span>Buscar</span>
         </button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 // frontend/src/hooks/useAuth.tsx
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User } from '@/types';
 import { AuthService } from '@/lib/auth';
 
@@ -16,43 +16,64 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }){
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const checkAuth = useCallback(async () => {
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
     try {
       const token = AuthService.getToken();
       if (token) {
         const userData = await AuthService.verifyAuth();
         setUser(userData);
-      } else {
-        setUser(null);
+        
+        // ✅ SOLUCIÓN SIN BACKEND: Detectar usuario nuevo usando localStorage
+        if (userData && userData.id) {
+          const userFirstSeen = localStorage.getItem(`user_first_seen_${userData.id}`);
+          
+          if (!userFirstSeen) {
+            // Es la primera vez que vemos a este usuario en este navegador
+            localStorage.setItem(`user_first_seen_${userData.id}`, new Date().toISOString());
+            localStorage.setItem('isFirstTimeUser', 'true');
+            console.log('👋 Usuario nuevo detectado (primera vez en este navegador)');
+          } else {
+            // Ya vimos a este usuario antes
+            console.log('👤 Usuario recurrente (visto por primera vez el:', userFirstSeen, ')');
+          }
+        }
       }
-    } catch {
+    } catch (error) {
+      console.error('Error verificando autenticación:', error);
       AuthService.removeToken();
-      setUser(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => { void checkAuth(); }, [checkAuth]);
-
-  const login = useCallback(() => {
+  const login = () => {
     AuthService.loginWithGoogle();
-  }, []);
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     await AuthService.logout();
     setUser(null);
-  }, []);
+    // Limpiar flag de sesión (pero mantener el registro de primera vez)
+    sessionStorage.removeItem('hasSeenWelcome');
+  };
 
-  const refreshUser = useCallback(async () => {
-    const userData = await AuthService.getProfile();
-    setUser(userData);
-    console.log('✅ Usuario refrescado:', userData);
-  }, []);
+  const refreshUser = async () => {
+    try {
+      const userData = await AuthService.getProfile();
+      setUser(userData);
+      console.log('✅ Usuario refrescado:', userData);
+    } catch (error) {
+      console.error('Error refrescando usuario:', error);
+    }
+  };
 
   const value: AuthContextType = {
     user,
@@ -67,7 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  return ctx;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+  }
+  return context;
 }

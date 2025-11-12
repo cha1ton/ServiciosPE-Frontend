@@ -1,19 +1,33 @@
 // frontend/src/app/service/[source]/[id]/page.tsx
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Layout/Navbar";
 import { getNearbyCache } from "@/lib/searchCache";
-import { SearchItem, SearchService } from "@/lib/search";
+import { SearchItem, SearchService, getLocalServiceDetail } from "@/lib/search";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useAuth } from "@/hooks/useAuth";
 import { FavoritesService } from "@/lib/favorites";
 import { ReviewsService, ReviewPayload } from "@/lib/reviews";
-import { getLocalServiceDetail } from "@/lib/search";
+import {
+  Heart,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Navigation,
+  ArrowLeft,
+  Clock,
+  Star,
+  MessageCircle,
+  Info,
+  ImageOff,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import styles from "./detail.module.css";
 
-//GAAA
 type LatLng = { lat: number; lng: number };
 
 function buildDirectionsUrl(
@@ -39,42 +53,42 @@ export default function ServiceDetailPage() {
   const [favError, setFavError] = useState("");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  // Reseñas (solo para locales)
+  // Carrusel
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Reseñas
   const [reviews, setReviews] = useState<any[]>([]);
   const [revLoading, setRevLoading] = useState(false);
   const [revError, setRevError] = useState("");
   const [myRating, setMyRating] = useState<number>(5);
   const [myComment, setMyComment] = useState("");
+  const [hoveredStar, setHoveredStar] = useState<number>(0);
 
-  // Geo (para “Cómo llegar”)
+  // Geo
   const { coordinates, getCurrentLocation } = useGeolocation();
 
-  // 22-10-25 05:45am
+  // Respuestas del dueño
   const [canReply, setCanReply] = useState(false);
   const [replyWindowMin, setReplyWindowMin] = useState(15);
-  const [replyDraft, setReplyDraft] = useState<Record<string, string>>({}); // reviewId -> text
-  const [replyingId, setReplyingId] = useState<string | null>(null); // reviewId que estoy respondiendo/editando
+  const [replyDraft, setReplyDraft] = useState<Record<string, string>>({});
+  const [replyingId, setReplyingId] = useState<string | null>(null);
 
   function canEditOwnerReply(r: any) {
-  if (!r.ownerReply) return false;
-  const created = new Date(r.ownerReply.createdAt).getTime();
-  const now = Date.now();
-  return (now - created) <= replyWindowMin * 60 * 1000;
-}
+    if (!r.ownerReply) return false;
+    const created = new Date(r.ownerReply.createdAt).getTime();
+    const now = Date.now();
+    return now - created <= replyWindowMin * 60 * 1000;
+  }
 
-  // 🔹 Pide ubicación al montar (igual que haces en la lista)
   useEffect(() => {
     if (!coordinates) getCurrentLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const canFavorite = useMemo(
-    () => item?.source === "serviciospe",
-    [item?.source]
-  );
-  const canComment = canFavorite; // comentarios solo en locales
+  const canFavorite = useMemo(() => item?.source === "serviciospe", [item?.source]);
+  const canComment = canFavorite;
 
-  // Cargar desde cache; si no hay, fallback a Nearby (misma UX que lista)
+  // Cargar desde cache
   useEffect(() => {
     const source = params.source;
     const id = params.id;
@@ -82,9 +96,7 @@ export default function ServiceDetailPage() {
     const tryCache = () => {
       const cache = getNearbyCache();
       if (!cache) return false;
-      const found = cache.results.find(
-        (r) => r.id === id && r.source === source
-      );
+      const found = cache.results.find((r) => r.id === id && r.source === source);
       if (found) {
         setItem(found);
         return true;
@@ -94,9 +106,7 @@ export default function ServiceDetailPage() {
 
     const fetchFallback = async () => {
       try {
-        // si no hay cache o no está el ítem, intenta Nearby 1 llamada
-        const center =
-          coordinates || { lat: -12.0464, lng: -77.0428 }; // Lima centro fallback
+        const center = coordinates || { lat: -12.0464, lng: -77.0428 };
         const resp = await SearchService.search({
           lat: center.lat,
           lng: center.lng,
@@ -104,9 +114,7 @@ export default function ServiceDetailPage() {
           page: 1,
           limit: 20,
         });
-        const f = resp.results.find(
-          (r: SearchItem) => r.id === id && r.source === source
-        );
+        const f = resp.results.find((r: SearchItem) => r.id === id && r.source === source);
         setItem(f || null);
       } catch {
         setItem(null);
@@ -122,7 +130,7 @@ export default function ServiceDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.source, params.id]);
 
-  // Cargar favoritos (solo si es local)
+  // Cargar favoritos
   useEffect(() => {
     if (!item || item.source !== "serviciospe" || !isAuthenticated) return;
     (async () => {
@@ -130,12 +138,12 @@ export default function ServiceDetailPage() {
         const { favorites } = await FavoritesService.listMine();
         setIsFavorite(favorites.includes(item.id));
       } catch {
-        // ignora
+        /* ignore */
       }
     })();
   }, [item, isAuthenticated]);
 
-  // Cargar reseñas (solo locales)
+  // Cargar reseñas
   useEffect(() => {
     if (!item || item.source !== "serviciospe") return;
     (async () => {
@@ -153,33 +161,35 @@ export default function ServiceDetailPage() {
     })();
   }, [item]);
 
+  // Cargar detalles completos
   useEffect(() => {
     if (!item) return;
-    // solo para locales: trae todo (fotos, descripción, rating fresco)
     if (item.source === "serviciospe") {
       (async () => {
         try {
           const { success, service } = await getLocalServiceDetail(item.id);
           if (success && service) {
-            // fusiona lo que ya tenías (coords, etc.) con el detalle completo
-            setItem(prev => prev ? {
-              ...prev,
-              name: service.name,
-              address: service.address,
-              rating: service.rating,
-              contact: service.contact,
-              imagesUrl: (service.images || []).map((i: any) => i.url).filter(Boolean),
-              description: service.description || '',
-              schedule: service.schedule || null
-            } : prev);
+            setItem((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    name: service.name,
+                    address: service.address,
+                    rating: service.rating,
+                    contact: service.contact,
+                    imagesUrl: (service.images || []).map((i: any) => i.url).filter(Boolean),
+                    description: service.description || "",
+                    schedule: service.schedule || null,
+                  }
+                : prev
+            );
           }
         } catch {
-          // ignora en MVP
+          /* ignore */
         }
       })();
     }
   }, [item?.id, item?.source]);
-
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -201,29 +211,31 @@ export default function ServiceDetailPage() {
   };
 
   async function submitOwnerReply(reviewId: string) {
-  const text = (replyDraft[reviewId] || '').trim();
-  if (!text) return;
-  try {
-    setRevLoading(true);
-    setRevError('');
-    await ReviewsService.reply(reviewId, text);
-    // recargar lista
-    const res = await ReviewsService.list(item!.id);
-    setReviews(res.reviews);
-    setCanReply(!!res.canReply);
-    if (res.replyEditWindowMinutes) setReplyWindowMin(res.replyEditWindowMinutes);
-    setReplyingId(null);
-  } catch (e: any) {
-    setRevError(e?.message || 'Error enviando respuesta');
-  } finally {
-    setRevLoading(false);
+    if (!item) return;
+    const text = (replyDraft[reviewId] || "").trim();
+    if (!text) return;
+    try {
+      setRevLoading(true);
+      setRevError("");
+      await ReviewsService.reply(reviewId, text);
+      const res = await ReviewsService.list(item.id);
+      setReviews(res.reviews);
+      setCanReply(!!res.canReply);
+      if (res.replyEditWindowMinutes) setReplyWindowMin(res.replyEditWindowMinutes);
+      setReplyingId(null);
+    } catch (e: any) {
+      setRevError(e?.message || "Error enviando respuesta");
+    } finally {
+      setRevLoading(false);
+    }
   }
-}
-
 
   const submitReview = async () => {
     if (!item || !canComment) return;
-    if (!isAuthenticated) { router.push("/login"); return; }
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
 
     try {
       setRevLoading(true);
@@ -233,7 +245,6 @@ export default function ServiceDetailPage() {
       await ReviewsService.create(item.id, payload);
       setMyComment("");
 
-      // ⬇️ Usa el mismo shape que submitOwnerReply
       const res = await ReviewsService.list(item.id);
       setReviews(res.reviews);
       setCanReply(!!res.canReply);
@@ -242,7 +253,7 @@ export default function ServiceDetailPage() {
       if (item.source === "serviciospe") {
         const { success, service } = await getLocalServiceDetail(item.id);
         if (success && service) {
-          setItem(prev => (prev ? { ...prev, rating: service.rating } : prev));
+          setItem((prev) => (prev ? { ...prev, rating: service.rating } : prev));
         }
       }
     } catch (e: any) {
@@ -252,13 +263,27 @@ export default function ServiceDetailPage() {
     }
   };
 
+  // Funciones del carrusel
+  const images = (item as any)?.imagesUrl || [];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   if (loading) {
     return (
-      <div>
+      <div className={styles.page}>
         <Navbar />
-        <main style={{ padding: 16 }}>
-          <p>Cargando detalle…</p>
+        <main className={styles.main}>
+          <div className={styles.loading}>
+            <div className={styles.spinner}></div>
+            <p className={styles.loadingText}>Cargando detalle...</p>
+          </div>
         </main>
       </div>
     );
@@ -266,21 +291,28 @@ export default function ServiceDetailPage() {
 
   if (!item) {
     return (
-      <div>
+      <div className={styles.page}>
         <Navbar />
-        <main style={{ padding: 16 }}>
-          <h2>No encontramos este lugar</h2>
-          <p>Vuelve al inicio y prueba otra búsqueda.</p>
+        <main className={styles.main}>
+          <div className={styles.notFound}>
+            <div className={styles.notFoundIcon}>🔍</div>
+            <h2 className={styles.notFoundTitle}>No encontramos este lugar</h2>
+            <p className={styles.notFoundText}>Vuelve al inicio y prueba otra búsqueda.</p>
+            <button
+              onClick={() => router.push("/")}
+              className={`${styles.actionButton} ${styles.primary}`}
+            >
+              <ArrowLeft size={18} />
+              Volver al inicio
+            </button>
+          </div>
         </main>
       </div>
     );
   }
 
-  // 🔹 Construye el link igual que en la card
   const hasOrigin =
-    !!coordinates &&
-    typeof coordinates.lat === "number" &&
-    typeof coordinates.lng === "number";
+    !!coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number";
   const hasDest =
     !!item.coordinates &&
     typeof item.coordinates.lat === "number" &&
@@ -295,177 +327,259 @@ export default function ServiceDetailPage() {
       : "";
 
   return (
-    <div>
+    <div className={styles.page}>
       <Navbar />
-      <main style={{ padding: 16, maxWidth: 900, margin: "0 auto" }}>
-        {/* Encabezado */}
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}
-        >
-          <h1 style={{ margin: 0 }}>{item.name}</h1>
-          <span
-            style={{
-              fontSize: 12,
-              color: "#666",
-              border: "1px solid #ddd",
-              borderRadius: 8,
-              padding: "2px 6px",
-            }}
-          >
-            Fuente · {item.source === "google" ? "Google" : "ServiciosPE"}
-          </span>
-          {canFavorite && (
-            <button
-              onClick={toggleFavorite}
-              disabled={favLoading}
-              title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
-              style={{
-                marginLeft: "auto",
-                padding: "8px 10px",
-                borderRadius: 10,
-                border: "1px solid #ddd",
-                background: isFavorite ? "#ffe3e3" : "#f7f7f8",
-                cursor: favLoading ? "not-allowed" : "pointer",
-              }}
-            >
-              {isFavorite ? "❤️ En favoritos" : "♡ Añadir a favoritos"}
-            </button>
-          )}
-        </div>
-
-        {/* Galería (hasta 3) */}
-        <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-          {(item as any).imagesUrl && (item as any).imagesUrl.length > 0 ? (
-            (item as any).imagesUrl.slice(0,3).map((url: string, idx: number) => (
-              <div key={idx} style={{ width: '100%', aspectRatio: '1 / 1', overflow: 'hidden', borderRadius: 10, background: '#f2f2f2' }}>
-                <img src={url} alt={`${item.name} ${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <main className={styles.main}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.headerTop}>
+            <div className={styles.titleWrapper}>
+              <h1 className={styles.title}>{item.name}</h1>
+              <div className={styles.badges}>
+                <span className={`${styles.badge} ${styles.badgeSource}`}>
+                  {item.source === "google" ? "Google" : "ServiciosPE"}
+                </span>
+                {item.category && (
+                  <span className={styles.badge}>{(item.category || "").replaceAll("_", " ")}</span>
+                )}
               </div>
-            ))
-          ) : (
-            <div style={{ gridColumn: '1 / -1', width: '100%', aspectRatio: '16 / 9', borderRadius: 12, overflow: 'hidden', background: '#f2f2f2' }}>
-              {item.image ? (
-                <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "#999" }}>Sin foto</div>
-              )}
             </div>
-          )}
-        </div>
 
-        {/* Info */}
-        <section style={{ marginTop: 14 }}>
-          {(item as any).description && (
-            <p style={{ marginTop: 10, color: '#444', lineHeight: 1.5 }}>
-              {(item as any).description}
-            </p>
-          )}
-
-          <div style={{ color: "#444", fontSize: 15 }}>
-            {item.address?.formatted ||
-              [item.address?.street, item.address?.district, item.address?.city]
-                .filter(Boolean)
-                .join(", ") ||
-              "Ubicación aproximada"}
+            <div className={styles.headerActions}>
+              {/* Botón de favoritos - Mostrar siempre pero deshabilitado para Google */}
+              <button
+                onClick={canFavorite ? toggleFavorite : undefined}
+                disabled={favLoading || !canFavorite}
+                className={`${styles.favoriteButton} ${isFavorite ? styles.active : ""} ${
+                  !canFavorite ? styles.disabled : ""
+                }`}
+                title={!canFavorite ? "Solo disponible para servicios de ServiciosPE" : ""}
+              >
+                <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+                {isFavorite ? "En favoritos" : "Añadir a favoritos"}
+              </button>
+            </div>
           </div>
-          <div style={{ marginTop: 6, color: "#666" }}>
-            ⭐ {item.rating?.average?.toFixed(1) ?? "0"} ({item.rating?.count ?? 0})
+
+          <div className={styles.rating}>
+            <div className={styles.ratingStars}>
+              <Star size={20} fill="#fbbf24" color="#fbbf24" />
+              {item.rating?.average?.toFixed(1) ?? "0.0"}
+            </div>
+            <span className={styles.ratingCount}>({item.rating?.count ?? 0} reseñas)</span>
+            
             {item.source === "google" && (
-              <>
-                {" "}
-                •{" "}
+              <div className={styles.googleLinks}>
                 <a
                   href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className={styles.ratingLink}
                 >
+                  <MessageCircle size={16} />
                   Ver reseñas en Google
                 </a>
+                <a
+                  href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.ratingLink} ${styles.secondary}`}
+                >
+                  <MapPin size={16} />
+                  Abrir en Google Maps
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Galería con Carrusel */}
+        {images.length > 0 ? (
+          <div className={styles.carousel}>
+            <div className={styles.carouselImage}>
+              <img src={images[currentImageIndex]} alt={`${item.name} ${currentImageIndex + 1}`} />
+            </div>
+            
+            {hasMultipleImages && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className={`${styles.carouselButton} ${styles.carouselButtonPrev}`}
+                  aria-label="Imagen anterior"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className={`${styles.carouselButton} ${styles.carouselButtonNext}`}
+                  aria-label="Siguiente imagen"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                <div className={styles.carouselIndicators}>
+                  {images.map((_: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`${styles.carouselIndicator} ${
+                        idx === currentImageIndex ? styles.active : ""
+                      }`}
+                      aria-label={`Ir a imagen ${idx + 1}`}
+                    />
+                  ))}
+                </div>
               </>
             )}
           </div>
+        ) : (
+          <div className={styles.galleryPlaceholder}>
+            {item.image ? (
+              <img src={item.image} alt={item.name} />
+            ) : (
+              <>
+                <ImageOff size={48} strokeWidth={1.5} />
+                <span>Sin imagen</span>
+              </>
+            )}
+          </div>
+        )}
 
-                    {/* Contacto */}
-          {item.contact && (
-            <div style={{ marginTop: 8, display: "grid", gap: 6, fontSize: 14 }}>
-              {item.contact.phone && (
-                <div>📞 <a href={`tel:${item.contact.phone}`}>{item.contact.phone}</a></div>
-              )}
-              {item.contact.email && (
-                <div>✉️ <a href={`mailto:${item.contact.email}`}>{item.contact.email}</a></div>
-              )}
-              {item.contact.website && (
-                <div>🌐 <a href={item.contact.website} target="_blank" rel="noopener noreferrer">{item.contact.website}</a></div>
-              )}
+        {/* Descripción */}
+        {(item as any).description && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}>
+                <Info size={20} />
+              </span>
+              Descripción
+            </h2>
+            <p className={styles.description}>{(item as any).description}</p>
+          </div>
+        )}
+
+        {/* Información */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <MapPin size={20} />
+            </span>
+            Información de Contacto
+          </h2>
+
+          <div className={styles.infoGrid}>
+            <div className={styles.infoItem}>
+              <span className={styles.infoIcon}>
+                <MapPin size={18} />
+              </span>
+              <span className={styles.infoText}>
+                {item.address?.formatted ||
+                  [item.address?.street, item.address?.district, item.address?.city]
+                    .filter(Boolean)
+                    .join(", ") ||
+                  "Ubicación aproximada"}
+              </span>
             </div>
-          )}
 
+            {item.contact?.phone && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoIcon}>
+                  <Phone size={18} />
+                </span>
+                <span className={styles.infoText}>
+                  <a href={`tel:${item.contact.phone}`}>{item.contact.phone}</a>
+                </span>
+              </div>
+            )}
 
-          <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {item.contact?.email && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoIcon}>
+                  <Mail size={18} />
+                </span>
+                <span className={styles.infoText}>
+                  <a href={`mailto:${item.contact.email}`}>{item.contact.email}</a>
+                </span>
+              </div>
+            )}
+
+            {item.contact?.website && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoIcon}>
+                  <Globe size={18} />
+                </span>
+                <span className={styles.infoText}>
+                  <a href={item.contact.website} target="_blank" rel="noopener noreferrer">
+                    {item.contact.website}
+                  </a>
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.actions}>
             {hasOrigin && hasDest ? (
               <a
                 href={directionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  display: "inline-block",
-                  padding: "10px 14px",
-                  borderRadius: 10,
-                  border: "1px solid #ddd",
-                  background: "#f7f7f8",
-                  textDecoration: "none",
-                  color: "#111",
-                }}
-                title="Abrir ruta en Google Maps"
+                className={`${styles.actionButton} ${styles.primary}`}
               >
-                🧭 Cómo llegar
+                <Navigation size={18} />
+                Cómo llegar
               </a>
             ) : (
-              <button
-                onClick={() => getCurrentLocation()}
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: 10,
-                  border: "1px solid #eee",
-                  background: "#eee",
-                  color: "#888",
-                  cursor: "pointer",
-                }}
-                title="Necesitas permitir ubicación para trazar la ruta"
-              >
-                🧭 Cómo llegar
+              <button onClick={() => getCurrentLocation()} className={styles.actionButton}>
+                <Navigation size={18} />
+                Cómo llegar
               </button>
             )}
 
-            <button
-              onClick={() => router.back()}
-              style={{
-                padding: "10px 14px",
-                borderRadius: 10,
-                border: "1px solid #ddd",
-                background: "#fff",
-              }}
-            >
-              ← Volver
+            <button onClick={() => router.back()} className={styles.actionButton}>
+              <ArrowLeft size={18} />
+              Volver
             </button>
           </div>
-        </section>
+        </div>
 
         {/* Horario */}
         {(item as any).schedule && (
-          <div style={{ marginTop: 12 }}>
-            <h3 style={{ margin: "0 0 6px" }}>Horario</h3>
-            <div style={{ display: "grid", gap: 6, fontSize: 14 }}>
-              {["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map((d) => {
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}>
+                <Clock size={20} />
+              </span>
+              Horario de Atención
+            </h2>
+            <div className={styles.scheduleGrid}>
+              {[
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday",
+              ].map((d) => {
                 const row = (item as any).schedule?.[d];
-                const label: Record<string,string> = {
-                  monday: "Lunes", tuesday: "Martes", wednesday: "Miércoles",
-                  thursday: "Jueves", friday: "Viernes", saturday: "Sábado", sunday: "Domingo"
+                const label: Record<string, string> = {
+                  monday: "Lunes",
+                  tuesday: "Martes",
+                  wednesday: "Miércoles",
+                  thursday: "Jueves",
+                  friday: "Viernes",
+                  saturday: "Sábado",
+                  sunday: "Domingo",
                 };
                 const txt = row?.open && row?.close ? `${row.open} – ${row.close}` : "Cerrado";
+                const isClosed = !row?.open || !row?.close;
+
                 return (
-                  <div key={d} style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span>{label[d]}</span>
-                    <span style={{ color: "#444" }}>{txt}</span>
+                  <div key={d} className={styles.scheduleRow}>
+                    <span className={styles.scheduleDay}>{label[d]}</span>
+                    <span className={`${styles.scheduleTime} ${isClosed ? styles.closed : ""}`}>
+                      {txt}
+                    </span>
                   </div>
                 );
               })}
@@ -473,217 +587,251 @@ export default function ServiceDetailPage() {
           </div>
         )}
 
-        {/* Reseñas (solo locales) */}
-        {canComment && (
-          <section style={{ marginTop: 20 }}>
-            <h3 style={{ margin: "0 0 8px" }}>Reseñas de la comunidad</h3>
+        {/* Reseñas */}
+        <div className={styles.reviewsSection}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <MessageCircle size={20} />
+            </span>
+            Reseñas de la Comunidad
+          </h2>
 
-            {/* Formulario */}
-            <div
-              style={{
-                border: "1px solid #eee",
-                borderRadius: 12,
-                padding: 12,
-                background: "#fafafa",
-              }}
-            >
-              {!isAuthenticated ? (
-                <div style={{ color: "#666" }}>
-                  Inicia sesión para dejar una reseña.
-                </div>
-              ) : (
-                <>
-                  <label style={{ fontSize: 14 }}>Calificación</label>
-                  <select
-                    value={myRating}
-                    onChange={(e) => setMyRating(Number(e.target.value))}
-                    style={{ marginLeft: 8 }}
-                  >
-                    {[5, 4, 3, 2, 1].map((n) => (
-                      <option key={n} value={n}>
-                        {n} ⭐
-                      </option>
-                    ))}
-                  </select>
+          {!canComment ? (
+            <div className={styles.googleReviewsNotice}>
+              <div className={styles.noticeIcon}>
+                <Info size={32} />
+              </div>
+              <h3 className={styles.noticeTitle}>Servicio de Google</h3>
+              <p className={styles.noticeText}>
+                Este servicio proviene de Google Maps. Para ver o dejar reseñas, visita su página
+                en Google Maps.
+              </p>
+              <a
+                href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.noticeButton}
+              >
+                <MessageCircle size={18} />
+                Ver reseñas en Google Maps
+              </a>
+            </div>
+          ) : (
+            <>
+              {/* Formulario */}
+              <div className={styles.reviewForm}>
+                {!isAuthenticated ? (
+                  <div className={styles.loginPrompt}>Inicia sesión para dejar una reseña</div>
+                ) : (
+                  <>
+                    <h3 className={styles.reviewFormTitle}>Escribe tu reseña</h3>
 
-                  <div style={{ marginTop: 8 }}>
+                    <div className={styles.ratingSelector}>
+                      <span className={styles.ratingLabel}>Calificación:</span>
+                      <div className={styles.starRating}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setMyRating(star)}
+                            onMouseEnter={() => setHoveredStar(star)}
+                            onMouseLeave={() => setHoveredStar(0)}
+                            className={styles.starButton}
+                          >
+                            <Star
+                              size={28}
+                              fill={star <= (hoveredStar || myRating) ? "#fbbf24" : "none"}
+                              color={star <= (hoveredStar || myRating) ? "#fbbf24" : "#d1d5db"}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <textarea
-                      placeholder="Escribe tu reseña (máx. 200 caracteres)"
+                      placeholder="Comparte tu experiencia (máximo 200 caracteres)"
                       maxLength={200}
                       value={myComment}
                       onChange={(e) => setMyComment(e.target.value)}
-                      rows={3}
-                      style={{
-                        width: "100%",
-                        borderRadius: 10,
-                        border: "1px solid #ddd",
-                        padding: 8,
-                      }}
+                      className={styles.reviewTextarea}
                     />
-                  </div>
 
-                  <div
-                    style={{
-                      marginTop: 8,
-                      display: "flex",
-                      gap: 8,
-                      alignItems: "center",
-                    }}
-                  >
-                    <button
-                      disabled={revLoading || myComment.trim().length === 0}
-                      onClick={submitReview}
-                      style={{
-                        padding: "8px 12px",
-                        borderRadius: 10,
-                        border: "1px solid #ddd",
-                        background: "#f7f7f8",
-                      }}
-                    >
-                      Publicar
-                    </button>
-                    {revError && (
-                      <span style={{ color: "#a00" }}>{revError}</span>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Lista */}
-            <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-              {revLoading && <div>Cargando reseñas…</div>}
-              {!revLoading && reviews.length === 0 && (
-                <div style={{ color: "#666" }}>
-                  Sé el primero en reseñar este lugar.
-                </div>
-              )}
-              {reviews.map((r) => {
-  const ownerHasReply = !!r.ownerReply;
-  const editable = ownerHasReply && canEditOwnerReply(r);
-
-  return (
-    <div key={r._id} style={{ border: "1px solid #eee", borderRadius: 12, padding: 12, background: "#fff" }}>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <strong>{r.authorName || "Usuario"}</strong>
-        <span>•</span>
-        <span>{new Date(r.createdAt).toLocaleDateString("es-PE")}</span>
-        <span style={{ marginLeft: "auto" }}>⭐ {r.rating}</span>
-      </div>
-      <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{r.comment}</div>
-
-      {/* Respuesta del dueño (si existe) */}
-      {ownerHasReply && (
-        <div style={{
-          marginTop: 10,
-          padding: 10,
-          borderLeft: "4px solid #4caf50",
-          background: "#f6fff7",
-          borderRadius: 8
-        }}>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>Respuesta del dueño</div>
-          <div style={{ whiteSpace: "pre-wrap" }}>{r.ownerReply.text}</div>
-          <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
-            {editable
-              ? `Puedes editar por ~${replyWindowMin} min desde la primera respuesta.`
-              : `Respondido el ${new Date(r.ownerReply.createdAt).toLocaleString("es-PE")}`}
-          </div>
-        </div>
-      )}
-
-      {/* Acciones del dueño */}
-      {canReply && (
-        <div style={{ marginTop: 8 }}>
-          {!ownerHasReply ? (
-            <>
-              {replyingId === r._id ? (
-                <>
-                  <textarea
-                    placeholder="Escribe tu respuesta (máx. 300)"
-                    maxLength={300}
-                    value={replyDraft[r._id] || ""}
-                    onChange={(e) =>
-                      setReplyDraft(prev => ({ ...prev, [r._id]: e.target.value }))
-                    }
-                    rows={3}
-                    style={{ width: "100%", borderRadius: 10, border: "1px solid #ddd", padding: 8 }}
-                  />
-                  <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
-                    <button
-                      disabled={revLoading || !(replyDraft[r._id] || '').trim()}
-                      onClick={() => submitOwnerReply(r._id)}
-                      style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
-                    >
-                      Publicar respuesta
-                    </button>
-                    <button
-                      onClick={() => setReplyingId(null)}
-                      style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#fff" }}
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <button
-                  onClick={() => { setReplyingId(r._id); setReplyDraft(prev => ({ ...prev, [r._id]: '' })); }}
-                  style={{ marginTop: 6, padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
-                >
-                  Responder como dueño
-                </button>
-              )}
-            </>
-          ) : (
-            editable && (
-              <>
-                {replyingId === r._id ? (
-                  <>
-                    <textarea
-                      placeholder="Editar respuesta (máx. 300)"
-                      maxLength={300}
-                      value={replyDraft[r._id] ?? r.ownerReply.text}
-                      onChange={(e) =>
-                        setReplyDraft(prev => ({ ...prev, [r._id]: e.target.value }))
-                      }
-                      rows={3}
-                      style={{ width: "100%", borderRadius: 10, border: "1px solid #ddd", padding: 8 }}
-                    />
-                    <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
+                    <div className={styles.reviewFormActions}>
                       <button
-                        disabled={revLoading || !(replyDraft[r._id] ?? r.ownerReply.text).trim()}
-                        onClick={() => submitOwnerReply(r._id)}
-                        style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
+                        disabled={revLoading || myComment.trim().length === 0}
+                        onClick={submitReview}
+                        className={styles.submitButton}
                       >
-                        Guardar cambios
+                        Publicar Reseña
                       </button>
-                      <button
-                        onClick={() => setReplyingId(null)}
-                        style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#fff" }}
-                      >
-                        Cancelar
-                      </button>
+                      {revError && <span className={styles.errorText}>{revError}</span>}
                     </div>
                   </>
-                ) : (
-                  <button
-                    onClick={() => { setReplyingId(r._id); setReplyDraft(prev => ({ ...prev, [r._id]: r.ownerReply.text })); }}
-                    style={{ marginTop: 6, padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", background: "#f7f7f8" }}
-                  >
-                    Editar respuesta
-                  </button>
                 )}
-              </>
-            )
+              </div>
+
+              {/* Lista de reseñas */}
+              <div className={styles.reviewsList}>
+                {revLoading && (
+                  <div className={styles.loading}>
+                    <div className={styles.spinner}></div>
+                    <p className={styles.loadingText}>Cargando reseñas...</p>
+                  </div>
+                )}
+
+                {!revLoading && reviews.length === 0 && (
+                  <div className={styles.emptyReviews}>Sé el primero en reseñar este lugar</div>
+                )}
+
+                {reviews.map((r) => {
+                  const ownerHasReply = !!r.ownerReply;
+                  const editable = ownerHasReply && canEditOwnerReply(r);
+
+                  return (
+                    <div key={r._id} className={styles.reviewItem}>
+                      <div className={styles.reviewHeader}>
+                        <span className={styles.reviewAuthor}>{r.authorName || "Usuario"}</span>
+                        <span className={styles.reviewDate}>•</span>
+                        <span className={styles.reviewDate}>
+                          {new Date(r.createdAt).toLocaleDateString("es-PE")}
+                        </span>
+                        <span className={styles.reviewRating}>
+                          <Star size={16} fill="#fbbf24" color="#fbbf24" />
+                          {r.rating}
+                        </span>
+                      </div>
+
+                      <div className={styles.reviewComment}>{r.comment}</div>
+
+                      {/* Respuesta del dueño */}
+                      {ownerHasReply && (
+                        <div className={styles.ownerReply}>
+                          <div className={styles.ownerReplyTitle}>
+                            <MessageCircle size={16} />
+                            Respuesta del dueño
+                          </div>
+                          <div className={styles.ownerReplyText}>{r.ownerReply.text}</div>
+                          <div className={styles.ownerReplyMeta}>
+                            {editable
+                              ? `Puedes editar por ~${replyWindowMin} min desde la primera respuesta.`
+                              : `Respondido el ${new Date(
+                                  r.ownerReply.createdAt
+                                ).toLocaleString("es-PE")}`}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Acciones del dueño */}
+                      {canReply && (
+                        <div className={styles.replyActions}>
+                          {!ownerHasReply ? (
+                            <>
+                              {replyingId === r._id ? (
+                                <div>
+                                  <textarea
+                                    placeholder="Escribe tu respuesta (máx. 300)"
+                                    maxLength={300}
+                                    value={replyDraft[r._id] || ""}
+                                    onChange={(e) =>
+                                      setReplyDraft((prev) => ({
+                                        ...prev,
+                                        [r._id]: e.target.value,
+                                      }))
+                                    }
+                                    className={styles.reviewTextarea}
+                                    rows={3}
+                                  />
+                                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                    <button
+                                      disabled={revLoading || !(replyDraft[r._id] || "").trim()}
+                                      onClick={() => submitOwnerReply(r._id)}
+                                      className={styles.submitButton}
+                                    >
+                                      Publicar respuesta
+                                    </button>
+                                    <button
+                                      onClick={() => setReplyingId(null)}
+                                      className={styles.replyButton}
+                                    >
+                                      Cancelar
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setReplyingId(r._id);
+                                    setReplyDraft((prev) => ({ ...prev, [r._id]: "" }));
+                                  }}
+                                  className={styles.replyButton}
+                                >
+                                  Responder como dueño
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            editable && (
+                              <>
+                                {replyingId === r._id ? (
+                                  <div>
+                                    <textarea
+                                      placeholder="Editar respuesta (máx. 300)"
+                                      maxLength={300}
+                                      value={replyDraft[r._id] ?? r.ownerReply.text}
+                                      onChange={(e) =>
+                                        setReplyDraft((prev) => ({
+                                          ...prev,
+                                          [r._id]: e.target.value,
+                                        }))
+                                      }
+                                      className={styles.reviewTextarea}
+                                      rows={3}
+                                    />
+                                    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                      <button
+                                        disabled={
+                                          revLoading ||
+                                          !(replyDraft[r._id] ?? r.ownerReply.text).trim()
+                                        }
+                                        onClick={() => submitOwnerReply(r._id)}
+                                        className={styles.submitButton}
+                                      >
+                                        Guardar cambios
+                                      </button>
+                                      <button
+                                        onClick={() => setReplyingId(null)}
+                                        className={styles.replyButton}
+                                      >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setReplyingId(r._id);
+                                      setReplyDraft((prev) => ({
+                                        ...prev,
+                                        [r._id]: r.ownerReply.text,
+                                      }));
+                                    }}
+                                    className={styles.replyButton}
+                                  >
+                                    Editar respuesta
+                                  </button>
+                                )}
+                              </>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
-      )}
-    </div>
-  );
-})}
-
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

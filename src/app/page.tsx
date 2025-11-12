@@ -12,8 +12,9 @@ import ResultCard from "@/components/Home/ResultCard";
 import { SearchItem, SearchService } from "@/lib/search";
 import { setNearbyCache } from '@/lib/searchCache';
 import ChatWidget from "@/components/Chat/ChatWidget";
-// import AuthGate from "@/components/AuthGate";
 import DirectLinkCard from "@/components/Ads/DirectLinkCard";
+import { MapPin, X } from "lucide-react";
+import styles from './page.module.css';
 
 const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER;
 const DIRECT_LINK_FEED = process.env.NEXT_PUBLIC_MONETAG_DIRECT_FEED ?? "";
@@ -24,38 +25,94 @@ export default function HomePage() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  const { coordinates, getCurrentLocation, loading: geoLoading, error: geoError } = useGeolocation();
+  const { coordinates, locationInfo, getCurrentLocation, loading: geoLoading, error: geoError } = useGeolocation();
 
   // Estado de filtros / consulta
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "">("");
-  const [distance, setDistance] = useState<DistanceOption>(500); // ✅ 500 m por defecto
+  const [distance, setDistance] = useState<DistanceOption>(500);
   const [openNow, setOpenNow] = useState(false);
 
   // Estado de resultados
   const [results, setResults] = useState<SearchItem[]>([]);
   const [searching, setSearching] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  
+  // Estado para mensajes temporales
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+  
+  // Estado para badge de ubicación contraído
+  const [locationBadgeCollapsed, setLocationBadgeCollapsed] = useState(false);
 
-  // Redirecci�n temprana eliminada: AuthGate y el guard con token se encargan
+  // Mensajes rotativos para usuarios recurrentes
+  const returningMessages = [
+    "¡Hola de nuevo!",
+    "¿Qué buscas hoy?",
+    "Bienvenido nuevamente",
+    "¡Qué bueno verte!",
+    "¿Listo para explorar?",
+  ];
 
-  // Pedir ubicación al entrar (una sola vez)
+  // Pedir ubicación al entrar
   useEffect(() => {
     if (!coordinates && !geoLoading) {
       getCurrentLocation();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pedir/actualizar ubicación cuando el usuario inicia sesión (cada login)
+  // Pedir/actualizar ubicación cuando el usuario inicia sesión
   useEffect(() => {
     if (!loading && isAuthenticated) {
       getCurrentLocation();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, isAuthenticated]);
 
-  // CTA proveedor / usuario (hooks antes de cualquier return)
+  // Determinar mensaje de bienvenida y mostrarlo
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      // Verificar si ya se mostró el mensaje en esta sesión
+      const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
+      
+      if (!hasSeenWelcome) {
+        // Verificar si es la primera vez del usuario (registro reciente)
+        const isFirstTime = localStorage.getItem('isFirstTimeUser');
+        
+        if (isFirstTime === 'true') {
+          // Primera vez - mensaje de bienvenida especial
+          setWelcomeMessage("¡Bienvenido a ServiciosPE! 🎉");
+          localStorage.removeItem('isFirstTimeUser'); // Limpiar flag
+        } else {
+          // Usuario recurrente - mensaje rotativo aleatorio
+          const randomMessage = returningMessages[Math.floor(Math.random() * returningMessages.length)];
+          setWelcomeMessage(`${randomMessage} ${user.nickname || user.name}`);
+        }
+        
+        setShowWelcomeMessage(true);
+        sessionStorage.setItem('hasSeenWelcome', 'true');
+        
+        // Auto-ocultar después de 4 segundos
+        const timer = setTimeout(() => {
+          setShowWelcomeMessage(false);
+        }, 4000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, isAuthenticated, user]);
+
+  // Contraer badge de ubicación después de 5 segundos (solo cuando el nombre esté cargado)
+  useEffect(() => {
+    if (coordinates && locationInfo && locationInfo.district) {
+      const timer = setTimeout(() => {
+        setLocationBadgeCollapsed(true);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [coordinates, locationInfo]);
+
   const ctaLabel = useMemo(
     () => (user?.role === "provider" ? "Editar mi negocio" : "Registrar mi negocio"),
     [user?.role]
@@ -65,7 +122,7 @@ export default function HomePage() {
     [user?.role]
   );
 
-  // Buscar manual (cuando el usuario presiona el botón “Buscar”)
+  // Buscar manual
   const handleSearch = async () => {
     if (!coordinates) return;
     setSearching(true);
@@ -82,7 +139,6 @@ export default function HomePage() {
         limit: 20,
       });
       setResults(resp.results);
-      // guarda caché para detalle
       setNearbyCache({
         ts: Date.now(),
         center: { lat: coordinates.lat, lng: coordinates.lng },
@@ -96,7 +152,7 @@ export default function HomePage() {
     }
   };
 
-  // 🔹 AUTO-FEED: cuando haya coords o cambien filtros básicos, trae cercanos SIN q (lista inicial)
+  // AUTO-FEED
   useEffect(() => {
     const run = async () => {
       if (!coordinates) return;
@@ -109,12 +165,10 @@ export default function HomePage() {
           radius: distance,
           category: category || undefined,
           openNow,
-          // 👇 Sin q: esto muestra lugares (tus servicios + Google) cercanos por defecto
           page: 1,
           limit: 20,
         });
         setResults(resp.results);
-        // guarda caché para detalle
         setNearbyCache({
           ts: Date.now(),
           center: { lat: coordinates.lat, lng: coordinates.lng },
@@ -128,68 +182,70 @@ export default function HomePage() {
       }
     };
     run();
-    // Actualiza cuando cambien coords, distancia, categoría u “abierto ahora”
   }, [coordinates?.lat, coordinates?.lng, distance, category, openNow]);
 
-  // La redirección se maneja en AuthGate y al hidratar el usuario
-
-  // gatea el render mientras hay token pero aún no se hidrata el user
   return (
-    
-    <div>
+    <div className={styles.page}>
       <Navbar />
 
-      <main style={{ padding: "16px", maxWidth: 960, margin: "0 auto" }}>
-
-        {/* Estado de geolocalización */}
-        <div
-          style={{
-            padding: "10px 12px",
-            border: "1px solid #eee",
-            borderRadius: 12,
-            background: "#fafafa",
-            marginBottom: 12,
-            fontSize: 14,
-          }}
-        >
-          {geoLoading && <span>📍 Obteniendo ubicación…</span>}
-          {!geoLoading && coordinates && (
-            <span>
-              📍 Ubicación: <b>{coordinates.lat.toFixed(5)}</b>, <b>{coordinates.lng.toFixed(5)}</b>
-            </span>
-          )}
-          {!geoLoading && !coordinates && (
-            <div>
-              <span style={{ color: "#a00" }}>No pudimos obtener tu ubicación.</span>{" "}
-              <button
-                onClick={getCurrentLocation}
-                style={{ textDecoration: "underline", cursor: "pointer", background: "transparent", border: "none" }}
-              >
-                Reintentar
-              </button>
-              {geoError && <div style={{ color: "#a00" }}>{geoError}</div>}
-            </div>
-          )}
+      {/* Badge de ubicación flotante en la esquina inferior izquierda */}
+      {coordinates && (
+        <div className={`${styles.locationBadge} ${locationBadgeCollapsed ? styles.collapsed : ''}`}>
+          <MapPin size={14} />
+          <span className={styles.locationBadgeText}>
+            {locationInfo?.district 
+              ? (locationInfo.city && locationInfo.district !== locationInfo.city
+                  ? `${locationInfo.district}, ${locationInfo.city}`
+                  : locationInfo.district)
+              : (locationInfo?.city || 'Detectando ubicación...')}
+          </span>
+          {/* Coordenadas comentadas - descomentar si se necesitan para debug */}
+          {/* <span className={styles.coords}>
+            ({coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)})
+          </span> */}
         </div>
+      )}
 
-        <ChatWidget
-          coords={coordinates || null}
-          defaultDistance={distance}
-          initialCategory={category || ""}
-          onRunSearch={(opts) => {
-            // Si el bot propone filtros, actualízalos y ejecuta la búsqueda
-            if (opts.distance) setDistance(opts.distance as any);
-            if (typeof opts.openNow === "boolean") setOpenNow(opts.openNow);
-            if (typeof opts.category === "string") setCategory(opts.category as any);
-            if (typeof opts.q === "string") setQuery(opts.q);
+      {/* Mensaje de bienvenida temporal (primera vez en la sesión) */}
+      {showWelcomeMessage && welcomeMessage && (
+        <div className={styles.welcomeMessage}>
+          <div className={styles.welcomeMessageContent}>
+            <span>{welcomeMessage}</span>
+            <button 
+              onClick={() => setShowWelcomeMessage(false)}
+              className={styles.welcomeMessageClose}
+              aria-label="Cerrar"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
-            // dispara la búsqueda con el estado actualizado
-            // pequeño delay para asegurar setState
-            setTimeout(() => handleSearch(), 0);
-          }}
-        />
+      <main className={styles.main}>
+        {/* Estado de geolocalización - SOLO MOSTRAR SI HAY ERROR O ESTÁ CARGANDO */}
+        {(!coordinates || geoError) && (
+          <div className={styles.locationBanner}>
+            {geoLoading && (
+              <div className={styles.locationContent}>
+                <MapPin size={18} className={styles.locationIcon} />
+                <span>Obteniendo ubicación...</span>
+              </div>
+            )}
+            {!geoLoading && !coordinates && (
+              <div className={styles.locationError}>
+                <MapPin size={18} className={styles.locationIconError} />
+                <span>No pudimos obtener tu ubicación.</span>
+                <button onClick={getCurrentLocation} className={styles.retryButton}>
+                  Reintentar
+                </button>
+                {geoError && <div className={styles.errorText}>{geoError}</div>}
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Buscador (si escribes texto y das “Buscar”, sobreescribe la lista) */}
+        {/* Buscador PRIMERO */}
         <SearchBar
           value={query}
           onChange={setQuery}
@@ -205,47 +261,60 @@ export default function HomePage() {
         <CategoryChips
           selected={category || ""}
           onSelect={(k) => setCategory(k === category ? "" : k)}
-          style={{ marginTop: 12 }}
         />
 
-        {/* Resultados */}
-        <section style={{ marginTop: 20, display: "grid", gap: 12 }}>
-          {searching && <div>Buscando…</div>}
-          {errorMsg && <div style={{ color: "#a00" }}>{errorMsg}</div>}
+        {/* Chat DESPUÉS del buscador */}
+        <ChatWidget
+          coords={coordinates || null}
+          defaultDistance={distance}
+          initialCategory={category || ""}
+          onRunSearch={(opts) => {
+            if (opts.distance) setDistance(opts.distance as any);
+            if (typeof opts.openNow === "boolean") setOpenNow(opts.openNow);
+            if (typeof opts.category === "string") setCategory(opts.category as any);
+            if (typeof opts.q === "string") setQuery(opts.q);
+            setTimeout(() => handleSearch(), 0);
+          }}
+        />
+
+        {/* Resultados en GRID de 3 columnas */}
+        <section className={styles.resultsSection}>
+          {searching && (
+            <div className={styles.loadingMessage}>
+              <div className={styles.spinner}></div>
+              <span>Buscando servicios...</span>
+            </div>
+          )}
+          {errorMsg && <div className={styles.errorMessage}>{errorMsg}</div>}
 
           {!searching && results.length === 0 && (
-            <div
-              style={{
-                padding: 12,
-                border: "1px dashed #ddd",
-                borderRadius: 12,
-                background: "#fff",
-                color: "#666",
-              }}
-            >
+            <div className={styles.emptyState}>
               {coordinates
                 ? "No encontramos resultados en esta zona y filtros."
                 : "Autoriza la ubicación para ver lugares cercanos."}
             </div>
           )}
 
-          {results.map((item, i) => (
-            <div key={`${item.source}:${item.id}`}>
-              <ResultCard item={item} origin={coordinates ?? undefined} />
-              {provider === "monetag" && i === 2 && (
-                <div style={{ margin: "12px 0" }}>
-                  <DirectLinkCard
-                    href={DIRECT_LINK_FEED}
-                    title="Publicidad recomendada"
-                    text="Anuncio relevante para tu búsqueda."
-                  />
+          {!searching && results.length > 0 && (
+            <div className={styles.resultsGrid}>
+              {results.map((item, i) => (
+                <div key={`${item.source}:${item.id}`}>
+                  <ResultCard item={item} origin={coordinates ?? undefined} />
+                  {provider === "monetag" && i === 2 && (
+                    <div className={styles.adCard}>
+                      <DirectLinkCard
+                        href={DIRECT_LINK_FEED}
+                        title="Publicidad recomendada"
+                        text="Anuncio relevante para tu búsqueda."
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
+          )}
         </section>
       </main>
     </div>
-    
   );
 }

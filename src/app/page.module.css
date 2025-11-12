@@ -1,167 +1,366 @@
-/* .page {
-  --gray-rgb: 0, 0, 0;
-  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
-  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-
-  display: grid;
-  grid-template-rows: 20px 1fr 20px;
-  align-items: center;
-  justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
-  font-family: var(--font-geist-sans);
-}
-
-@media (prefers-color-scheme: dark) {
-  .page {
-    --gray-rgb: 255, 255, 255;
-    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
-    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-  }
+/* ===== PAGE ===== */
+.page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  position: relative;
 }
 
 .main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ===== LOCATION BANNER ===== */
+.locationBanner {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.locationContent {
   display: flex;
-  flex-direction: column;
-  gap: 32px;
-  grid-row-start: 2;
+  align-items: center;
+  gap: 10px;
+  color: #444;
+  font-size: 0.95rem;
 }
 
-.main ol {
-  font-family: var(--font-geist-mono);
-  padding-left: 0;
-  margin: 0;
-  font-size: 14px;
-  line-height: 24px;
-  letter-spacing: -0.01em;
-  list-style-position: inside;
+.locationIcon {
+  color: #4285f4;
+  flex-shrink: 0;
 }
 
-.main li:not(:last-of-type) {
-  margin-bottom: 8px;
-}
-
-.main code {
-  font-family: inherit;
-  background: var(--gray-alpha-100);
-  padding: 2px 4px;
-  border-radius: 4px;
+.locationText {
   font-weight: 600;
+  color: #1a1a1a;
 }
 
-.ctas {
+.locationError {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 10px;
+  color: #d32f2f;
+  font-size: 0.95rem;
+  flex-wrap: wrap;
 }
 
-.ctas a {
-  appearance: none;
-  border-radius: 128px;
-  height: 48px;
-  padding: 0 20px;
-  border: 1px solid transparent;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+.locationIconError {
+  color: #d32f2f;
+  flex-shrink: 0;
+}
+
+.retryButton {
+  padding: 4px 12px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryButton:hover {
+  background: #357ae8;
+}
+
+.errorText {
+  width: 100%;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+/* ============================================
+   BADGE DE UBICACIÓN FLOTANTE
+   ============================================ */
+
+/* Badge flotante en la esquina inferior izquierda */
+.locationBadge {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4285f4;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Estado contraído (después de 5 segundos) */
+.locationBadge.collapsed {
+  width: 40px;
+  padding: 8px;
+  gap: 0;
+}
+
+.locationBadge.collapsed .locationBadgeText {
+  opacity: 0;
+  width: 0;
+  transform: translateX(-10px);
+}
+
+/* Expansión al hover */
+.locationBadge:hover {
+  width: auto;
+  padding: 8px 16px;
+  gap: 6px;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.locationBadge:hover .locationBadgeText {
+  opacity: 1;
+  width: auto;
+  transform: translateX(0);
+}
+
+/* Texto del badge con transición */
+.locationBadgeText {
+  transition: all 0.3s ease;
+  display: inline-block;
+  color: #1a1a1a;
+}
+
+.locationBadge .coords {
+  font-size: 11px;
+  color: #666;
+  margin-left: 4px;
+}
+
+/* ============================================
+   MENSAJE DE BIENVENIDA
+   ============================================ */
+
+.welcomeMessage {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 400px;
+  width: auto;
+  animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3) translateY(-50px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05) translateY(0);
+  }
+  70% {
+    transform: translateX(-50%) scale(0.95) translateY(0);
+  }
+  100% {
+    transform: translateX(-50%) scale(1) translateY(0);
+  }
+}
+
+.welcomeMessageContent {
+  background: linear-gradient(135deg, #4285f4 0%, #357ae8 100%);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 600;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de brillo que cruza el mensaje */
+.welcomeMessageContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shine 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+.welcomeMessageClose {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  padding: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  line-height: 20px;
+  transition: all 0.2s ease;
+  color: white;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.welcomeMessageClose:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* ===== RESULTS SECTION ===== */
+.resultsSection {
+  margin-top: 24px;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ===== LOADING ===== */
+.loadingMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 1rem;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #4285f4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== EMPTY STATE ===== */
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  background: white;
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  color: #666;
+  font-size: 1rem;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.errorMessage {
+  padding: 16px 20px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 12px;
+  color: #c62828;
+  font-size: 0.95rem;
   font-weight: 500;
 }
 
-a.primary {
-  background: var(--foreground);
-  color: var(--background);
-  gap: 8px;
+/* ===== AD CARD ===== */
+.adCard {
+  margin-top: 12px;
 }
 
-a.secondary {
-  border-color: var(--gray-alpha-200);
-  min-width: 158px;
-}
-
-.footer {
-  grid-row-start: 3;
-  display: flex;
-  gap: 24px;
-}
-
-.footer a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.footer img {
-  flex-shrink: 0;
-}
-
-
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
-
-  .footer a:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .resultsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
-@media (max-width: 600px) {
-  .page {
-    padding: 32px;
-    padding-bottom: 80px;
-  }
-
+@media (max-width: 768px) {
   .main {
-    align-items: center;
+    padding: 16px;
   }
 
-  .main ol {
-    text-align: center;
+  .resultsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .ctas {
-    flex-direction: column;
+  .locationBanner {
+    padding: 12px 16px;
   }
 
-  .ctas a {
+  .locationContent,
+  .locationError {
+    font-size: 0.9rem;
+  }
+
+  /* Badge de ubicación en móvil */
+  .locationBadge {
+    bottom: 16px;
+    left: 12px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* Mensaje de bienvenida en móvil */
+  .welcomeMessage {
+    top: 70px;
+    width: 90%;
+  }
+
+  .welcomeMessageContent {
+    padding: 12px 16px;
     font-size: 14px;
-    height: 40px;
-    padding: 0 16px;
-  }
-
-  a.secondary {
-    min-width: auto;
-  }
-
-  .footer {
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+@media (max-width: 480px) {
+  .main {
+    padding: 12px;
   }
-} */
+
+  .locationBanner {
+    padding: 10px 14px;
+  }
+
+  .resultsSection {
+    margin-top: 20px;
+  }
+}

@@ -1,0 +1,162 @@
+/* ===== FONDO IGUAL AL LOGIN ===== */
+.page {
+  min-height: 100vh;
+  background: url("https://t3.ftcdn.net/jpg/04/49/73/64/360_F_449736488_IAGo58o7DloC8Os5S5v9vppX3BIxzK4S.jpg") center/cover no-repeat fixed;
+  background-color: #4285f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.container {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 60px 50px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ===== GIF DE UBICACIÓN ===== */
+.iconContainer {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locationGif {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ===== TEXTOS ===== */
+.title {
+  font-size: 1.75rem;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ===== BARRA DE PROGRESO ===== */
+.progressBar {
+  position: relative;
+  height: 8px;
+  background: #e0e9ff;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.progressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #4285f4, #34a853);
+  width: 0%;
+  border-radius: 999px;
+  animation: fillProgress 8s ease-in-out forwards;
+  box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+}
+
+@keyframes fillProgress {
+  0% {
+    width: 0%;
+  }
+  20% {
+    width: 30%;
+  }
+  50% {
+    width: 60%;
+  }
+  80% {
+    width: 85%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* ===== TEXTO INFERIOR ===== */
+.hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hint::before {
+  content: "📍";
+  font-size: 1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page {
+    padding: 15px;
+  }
+
+  .container {
+    padding: 40px 30px;
+    max-width: 90%;
+  }
+
+  .iconContainer {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 25px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 35px 25px;
+  }
+
+  .iconContainer {
+    width: 130px;
+    height: 130px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+  }
+
+  .progressBar {
+    height: 6px;
+  }
+}

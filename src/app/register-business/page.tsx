@@ -8,6 +8,8 @@ import Navbar from "@/components/Layout/Navbar";
 import { BusinessService, BusinessFormData } from "@/lib/services";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import MapPicker from "@/components/Map/MapPicker";
+import { Building2, Info, MapPin, Phone, Clock, Image as ImageIcon } from "lucide-react";
+import styles from './register.module.css';
 
 const CATEGORIES = [
   { value: "restaurante", label: "Restaurante" },
@@ -34,10 +36,8 @@ export default function RegisterBusinessPage() {
 
   const { coordinates: geoCoords, getCurrentLocation, loading: geoLoading } = useGeolocation();
 
-  // NUEVO: estado para el pin
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-   // Centrar mapa en geolocalización cuando llegue
   useEffect(() => {
     if (!geoCoords) getCurrentLocation();
   }, []);
@@ -50,7 +50,6 @@ export default function RegisterBusinessPage() {
     phone: "",
     email: "",
     address: {},
-    // ✅ CORRECCIÓN: Usar los valores directamente, no la constante
     schedule: {
       monday: { open: "09:00", close: "18:00" },
       tuesday: { open: "09:00", close: "18:00" },
@@ -66,14 +65,12 @@ export default function RegisterBusinessPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ CORRECCIÓN: Manejar autenticación en useEffect
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
     }
   }, [authLoading, user, router]);
 
-  // ✅ CORRECCIÓN: Actualizar email cuando el usuario esté disponible
   useEffect(() => {
     if (user?.email) {
       setFormData((prev) => ({
@@ -83,16 +80,20 @@ export default function RegisterBusinessPage() {
     }
   }, [user?.email]);
 
-  // Mostrar loading mientras verifica autenticación
   if (authLoading) {
     return (
-      <div>
-        <p>Cargando...</p>
+      <div className={styles.page}>
+        <Navbar />
+        <main className={styles.main}>
+          <div className={styles.loading}>
+            <div className={styles.spinner}></div>
+            <p className={styles.loadingText}>Cargando...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
-  // No renderizar nada si no está autenticado (será redirigido)
   if (!user) {
     return null;
   }
@@ -120,10 +121,8 @@ export default function RegisterBusinessPage() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
     const { name, value } = e.target;
 
     if (name.includes(".")) {
@@ -162,10 +161,6 @@ export default function RegisterBusinessPage() {
     }));
   };
 
-  const handleGetLocation = () => {
-    getCurrentLocation();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -176,7 +171,6 @@ export default function RegisterBusinessPage() {
         throw new Error("Por favor completa todos los campos requeridos");
       }
 
-      // ⚠️ coords obligatorias (pin en el mapa)
       if (!coords) {
         throw new Error("Selecciona la ubicación en el mapa");
       }
@@ -185,15 +179,12 @@ export default function RegisterBusinessPage() {
         throw new Error("Debes subir al menos una imagen del negocio");
       }
 
-      // Agregar coordenadas si están disponibles
       const submissionData = {
         ...formData,
-        // fuente de verdad:
         coordinates: coords,
-        // los campos de address (street/district/city/reference) quedan opcionales
       };
 
-      console.log('📤 Enviando datos del negocio (coords como verdad)...');
+      console.log('📤 Enviando datos del negocio...');
 
       const result = await BusinessService.registerBusiness(
         submissionData,
@@ -202,13 +193,8 @@ export default function RegisterBusinessPage() {
 
       if (result.success) {
         console.log('✅ Negocio registrado exitosamente');
-        console.log('🔄 Refrescando datos del usuario...');
-
         await refreshUser();
         await new Promise(r => setTimeout(r, 100));
-
-        console.log('✅ Negocio registrado - usuario debería ser proveedor ahora');
-
         router.push("/?message=business_registered");
       } else {
         throw new Error(result.message);
@@ -223,222 +209,277 @@ export default function RegisterBusinessPage() {
   };
 
   return (
-    <div>
+    <div className={styles.page}>
       <Navbar />
 
-      <main>
-        <div>
-          <h1>Registra tu Negocio</h1>
-          <p>Completa la información de tu establecimiento</p>
+      <main className={styles.main}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Registra tu Negocio</h1>
+          <p className={styles.subtitle}>Completa la información de tu establecimiento</p>
+        </div>
 
-          {error && (<div>{error}</div>)}
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-            {/* Información básica */}
-            <div>
-              <div>
-                <label>Nombre del Negocio *</label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Información Básica */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Building2 size={20} /></span>
+              Información Básica
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Nombre del Negocio</label>
+              <input
+                type="text"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleInputChange}
+                className={styles.input}
+                placeholder="Ej: Restaurante El Buen Sabor"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Categoría</label>
+              <select
+                name="category"
+                required
+                value={formData.category}
+                onChange={handleInputChange}
+                className={styles.select}
+              >
+                <option value="">Selecciona una categoría</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Descripción</label>
+              <textarea
+                name="description"
+                required
+                value={formData.description}
+                onChange={handleInputChange}
+                className={styles.textarea}
+                placeholder="Describe tu negocio..."
+              />
+              <span className={styles.hint}>Cuéntale a tus clientes qué hace especial a tu negocio</span>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>¿Qué ofreces?</label>
+              <textarea
+                name="offerings"
+                value={formData.offerings}
+                onChange={handleInputChange}
+                className={styles.textarea}
+                placeholder="Ej: delivery, 24 horas, genéricos, promociones"
+              />
+              <span className={styles.hint}>Palabras clave que ayuden a los clientes a encontrarte</span>
+            </div>
+          </section>
+
+          {/* Contacto */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Phone size={20} /></span>
+              Información de Contacto
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Teléfono</label>
+              <input
+                type="tel"
+                name="phone"
+                required
+                value={formData.phone}
+                onChange={handleInputChange}
+                className={styles.input}
+                placeholder="+51 999 999 999"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Email</label>
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                className={styles.input}
+                disabled
+              />
+              <span className={styles.hint}>El email no puede ser modificado</span>
+            </div>
+          </section>
+
+          {/* Ubicación */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><MapPin size={20} /></span>
+              Ubicación
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Selecciona tu ubicación en el mapa</label>
+              <div className={styles.infoBox}>
+                Arrastra el pin o toca el mapa para fijar la ubicación exacta del negocio.
+              </div>
+              <div className={styles.mapContainer}>
+                <MapPicker
+                  initialCenter={geoCoords || { lat: -12.0464, lng: -77.0428 }}
+                  value={coords}
+                  onChange={setCoords}
+                  height="320px"
+                />
+              </div>
+              <div className={`${styles.coordsInfo} ${!coords ? styles.warning : ''}`}>
+                <MapPin size={16} />
+                {coords
+                  ? `Coordenadas: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`
+                  : 'Haz clic en el mapa para seleccionar tu ubicación'}
+              </div>
+            </div>
+
+            <div className={styles.infoBox}>
+              Los campos de dirección son opcionales e informativos. La ubicación real se toma del pin del mapa.
+            </div>
+
+            <div className={styles.addressGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Calle y número</label>
                 <input
                   type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-            <label>Categoría *</label>
-            <select
-              name="category"
-              required
-              value={formData.category}
-              onChange={handleInputChange}
-            >
-              <option value="">Selecciona una categoría</option>
-              {[
-                ...CATEGORIES,
-              ].map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-              <div>
-                <label>Descripción *</label>
-                <textarea
-                  name="description"
-                  required
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                />
-              </div>
-              {/* Que ofreces */}
-              <div>
-                <label>Que ofreces? (palabras clave)</label>
-                <textarea
-                  name="offerings"
-                  rows={2}
-                  placeholder="Ej: delivery, 24 horas, genericos, promociones, salsa/bachata principiante"
-                  value={formData.offerings}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
-            {/* Contacto */}
-            <div>
-              <div>
-                <label>Teléfono *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  required
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled
-                />
-                <p>El email no se puede modificar</p>
-              </div>
-            </div>
-
-
-            {/* Agregando codigo - 11/10/25 */}
-            {/* Dirección opcional (solo informativa) */}
-            <div style={{ marginTop: 16 }}>
-              <label>Información de dirección (opcional)</label>
-              <p style={{ margin: '6px 0 12px', fontSize: 13 }}>
-                Estos campos son solo informativos. La ubicación real se toma del pin del mapa.
-              </p>
-
-              <div>
-                <input type="text" name="address.street" placeholder="Calle y número (opcional)"
+                  name="address.street"
+                  placeholder="Av. Principal 123"
                   value={formData.address?.street || ""}
                   onChange={handleInputChange}
+                  className={styles.input}
                 />
               </div>
 
-              <div>
-                <input type="text" name="address.district" placeholder="Distrito (opcional)"
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Distrito</label>
+                <input
+                  type="text"
+                  name="address.district"
+                  placeholder="Miraflores"
                   value={formData.address?.district || ""}
                   onChange={handleInputChange}
+                  className={styles.input}
                 />
               </div>
-              <div>
-                <input type="text" name="address.city" placeholder="Ciudad (opcional)"
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Ciudad</label>
+                <input
+                  type="text"
+                  name="address.city"
+                  placeholder="Lima"
                   value={formData.address?.city || ""}
                   onChange={handleInputChange}
+                  className={styles.input}
                 />
               </div>
 
-              <div>
-                <input type="text" name="address.reference" placeholder="Referencia (opcional)"
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Referencia</label>
+                <input
+                  type="text"
+                  name="address.reference"
+                  placeholder="Cerca al parque central"
                   value={formData.address?.reference || ""}
                   onChange={handleInputChange}
+                  className={styles.input}
                 />
               </div>
             </div>
+          </section>
 
+          {/* Imágenes */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><ImageIcon size={20} /></span>
+              Imágenes del Negocio
+            </h2>
 
-            {/* UBICACIÓN: Mapa con pin obligatorio */}
-            <div style={{ marginTop: 16 }}>
-              <label>Ubicación en el mapa *</label>
-              <p style={{ margin: '6px 0 12px', fontSize: 14 }}>
-                Arrastra el pin o toca el mapa para fijar la ubicación exacta del negocio.
-              </p>
-
-              <MapPicker
-                initialCenter={geoCoords || { lat: -12.0464, lng: -77.0428 }}
-                value={coords}
-                onChange={setCoords}
-                height="320px"
-              />
-
-              <div style={{ marginTop: 8, fontSize: 13 }}>
-                {coords ? (
-                  <>Coordenadas seleccionadas: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</>
-                ) : (
-                  <span style={{ color: '#d00' }}>Selecciona la ubicación en el mapa</span>
-                )}
-              </div>
-            </div>
-
-            {/* Imágenes */}
-            <div>
-              <label>Imágenes del Negocio (3 Imágenes, 2MB cada una) *</label>
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Sube hasta 3 imágenes</label>
               <input
                 type="file"
                 multiple
                 accept="image/*"
                 required
                 onChange={handleImageChange}
+                className={styles.fileInput}
               />
-
-              {images.length > 0 && (
-                <div>
-                  {images.map((img, index) => (
-                    <div key={index}>
-                      <img
-                        src={URL.createObjectURL(img)}
-                        alt={`Preview ${index}`}
-                      />
-                      <button type="button" onClick={() => removeImage(index)}>
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <span className={styles.hint}>Máximo 3 imágenes de 2MB cada una</span>
             </div>
 
-            {/* Horarios */}
-            <div>
-              <label>Horario de Atención</label>
-              <div>
-                {Object.entries(formData.schedule).map(([day, schedule]) => (
-                  <div key={day}>
-                    <span>{day}:</span>
-                    <input
-                      type="time"
-                      value={schedule.open}
-                      onChange={(e) =>
-                        handleScheduleChange(day, "open", e.target.value)
-                      }
+            {images.length > 0 && (
+              <div className={styles.imagePreviewGrid}>
+                {images.map((img, index) => (
+                  <div key={index} className={styles.imagePreviewItem}>
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`Preview ${index}`}
+                      className={styles.previewImage}
                     />
-                    <span>a</span>
-                    <input
-                      type="time"
-                      value={schedule.close}
-                      onChange={(e) =>
-                        handleScheduleChange(day, "close", e.target.value)
-                      }
-                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className={styles.removeImageButton}
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+          </section>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Registrando Negocio..." : "Registrar Negocio"}
-            </button>
-          </form>
-        </div>
+          {/* Horarios */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Clock size={20} /></span>
+              Horario de Atención
+            </h2>
+
+            <div className={styles.scheduleGrid}>
+              {Object.entries(formData.schedule).map(([day, schedule]) => (
+                <div key={day} className={styles.scheduleRow}>
+                  <span className={styles.dayLabel}>{day}</span>
+                  <input
+                    type="time"
+                    value={schedule.open}
+                    onChange={(e) => handleScheduleChange(day, "open", e.target.value)}
+                    className={styles.timeInput}
+                  />
+                  <span className={styles.timeSeparator}>a</span>
+                  <input
+                    type="time"
+                    value={schedule.close}
+                    onChange={(e) => handleScheduleChange(day, "close", e.target.value)}
+                    className={styles.timeInput}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className={styles.hint}>Deja los campos vacíos para días cerrados</span>
+          </section>
+
+          <button type="submit" disabled={loading} className={styles.submitButton}>
+            {loading ? "Registrando Negocio..." : "Registrar Negocio"}
+          </button>
+        </form>
       </main>
     </div>
   );
 }
-

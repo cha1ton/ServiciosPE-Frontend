@@ -1,13 +1,7 @@
 :root {
+  color-scheme: light only;
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #0a0a0a;
 }
 
 html,
@@ -15,6 +9,7 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   min-height: 100vh;
+  color-scheme: light !important;
 }
 
 body {
@@ -35,9 +30,36 @@ a {
   color: inherit;
   text-decoration: none;
 }
+/* frontend/src/app/globals.css o donde tengas tus estilos globales */
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Forzar que las notificaciones de ads aparezcan en la esquina inferior derecha */
+/* Esto afecta a notificaciones de Monetag, PropellerAds, etc. */
+
+/* Selector para notificaciones push de Monetag */
+div[id*="pushpad"],
+div[class*="push-notification"],
+div[class*="web-push"],
+.monetag-push-notification,
+iframe[id*="push"],
+iframe[src*="monetag"],
+iframe[src*="push"] {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+  z-index: 9999 !important;
+}
+
+/* Si las notificaciones están en un contenedor */
+div[style*="position: fixed"][style*="top"] {
+  top: auto !important;
+  bottom: 20px !important;
+}
+
+/* Asegurar que no bloqueen el navbar */
+.navbar,
+nav {
+  z-index: 10000 !important;
+  position: relative;
 }

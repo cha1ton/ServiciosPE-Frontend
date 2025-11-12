@@ -7,6 +7,18 @@ import { useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { BusinessService } from "@/lib/services";
 import { ReviewsService } from '@/lib/reviews';
+import { 
+  Bell, 
+  Store, 
+  User, 
+  Heart, 
+  Lock, 
+  Info, 
+  Settings, 
+  Mail, 
+  LogOut,
+  MessageCircle
+} from "lucide-react";
 
 
 export default function Navbar() {
@@ -142,7 +154,6 @@ export default function Navbar() {
     }
   };
 
-
   const handleProfile = () => {
     router.push("/profile");
     setIsMenuOpen(false);
@@ -198,12 +209,32 @@ export default function Navbar() {
           <h2>ServiciosPE</h2>
         </div>
 
+        {/* Enlaces visibles en DESKTOP (ocultos en móvil) */}
+        <div className={styles.desktopLinks}>
+          {user?.role === "provider" && (
+            <button onClick={handleViewMyBusiness} className={styles.navLink}>
+              <MessageCircle size={18} />
+              <span>Mi Negocio</span>
+            </button>
+          )}
+
+          <button onClick={handleAbout} className={styles.navLink}>
+            <Info size={18} />
+            <span>Quiénes somos</span>
+          </button>
+
+          <button onClick={handleHowItWorks} className={styles.navLink}>
+            <Settings size={18} />
+            <span>Cómo funciona</span>
+          </button>
+        </div>
+
         {/* Botones de navegación */}
         <div className={styles.actions}>
           {/* Campana de notificaciones */}
           <div style={{ position: 'relative' }}>
             <button className={styles.notificationButton} onClick={handleToggleNotifications} aria-label="Notificaciones">
-              🔔
+              <Bell size={20} />
               {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
             </button>
             {showNotifications && (
@@ -232,11 +263,13 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
           <button 
             className={styles.businessButton}
             onClick={handleRegisterBusiness}
           >
-            {user?.role === 'provider' ? 'Editar mi negocio' : 'Mi Negocio'}
+            <Store size={18} />
+            <span>{user?.role === 'provider' ? 'Editar mi negocio' : 'Registrar negocio'}</span>
           </button>
 
           {/* Menú de perfil */}
@@ -269,34 +302,47 @@ export default function Navbar() {
                 </div>
 
                 <div className={styles.menuItems}>
-                  <button onClick={handleProfile} className={styles.menuItem}>
-                    👤 Mi Perfil
-                  </button>
+                  {/* Enlaces para MÓVIL ÚNICAMENTE (solo se ven en móvil) */}
+                  <div className={styles.mobileOnlyLinks}>
+                    {user?.role === "provider" && (
+                      <button onClick={handleViewMyBusiness} className={styles.menuItem}>
+                        <MessageCircle size={18} />
+                        <span>Ver mi negocio (responder reseñas)</span>
+                      </button>
+                    )}
 
-                  {user?.role === "provider" && (
-                    <button onClick={handleViewMyBusiness} className={styles.menuItem}>
-                      💬 Ver mi negocio (responder reseñas)
+                    <button onClick={handleAbout} className={styles.menuItem}>
+                      <Info size={18} />
+                      <span>Quiénes somos</span>
                     </button>
-                  )}
+                    
+                    <button onClick={handleHowItWorks} className={styles.menuItem}>
+                      <Settings size={18} />
+                      <span>Cómo funciona</span>
+                    </button>
 
+                    <hr className={styles.divider} />
+                  </div>
+
+                  {/* Enlaces visibles siempre en el menú desplegable */}
+                  <button onClick={handleProfile} className={styles.menuItem}>
+                    <User size={18} />
+                    <span>Mi Perfil</span>
+                  </button>
 
                   <button onClick={handleFavorites} className={styles.menuItem}>
-                    ❤️ Favoritos
+                    <Heart size={18} />
+                    <span>Favoritos</span>
                   </button>
-                  <hr className={styles.divider} />
 
                   <button onClick={handlePrivacy} className={styles.menuItem}>
-                    🔒 Política de Privacidad
+                    <Lock size={18} />
+                    <span>Política de Privacidad</span>
                   </button>
 
-                  <button onClick={handleAbout} className={styles.menuItem}>
-                    ℹ️ Quiénes somos
-                  </button>
-                  <button onClick={handleHowItWorks} className={styles.menuItem}>
-                    ⚙️ Cómo funciona
-                  </button>
                   <button onClick={handleContact} className={styles.menuItem}>
-                    ✉️ Contacto
+                    <Mail size={18} />
+                    <span>Contacto</span>
                   </button>
 
                   <hr className={styles.divider} />
@@ -306,7 +352,8 @@ export default function Navbar() {
                     className={styles.menuItem}
                     style={{ color: "red" }}
                   >
-                    🚪 Cerrar Sesión
+                    <LogOut size={18} />
+                    <span>Cerrar Sesión</span>
                   </button>
                 </div>
               </div>

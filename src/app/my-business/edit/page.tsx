@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Layout/Navbar';
 import MapPicker from '@/components/Map/MapPicker';
 import { BusinessService, BusinessFormData } from '@/lib/services';
+import { Building2, Info, MapPin, Phone, Clock, Image } from 'lucide-react';
+import styles from './edit.module.css';
 
 export default function EditMyBusinessPage() {
   const { user, loading: authLoading } = useAuth();
@@ -26,7 +28,7 @@ export default function EditMyBusinessPage() {
     offerings: '',
     phone: '',
     email: '',
-    address: {},      // opcional
+    address: {},
     schedule: {
       monday: { open: '09:00', close: '18:00' },
       tuesday: { open: '09:00', close: '18:00' },
@@ -38,7 +40,6 @@ export default function EditMyBusinessPage() {
     }
   });
 
-  // imágenes nuevas (para reemplazar)
   const [newImages, setNewImages] = useState<File[]>([]);
 
   useEffect(() => {
@@ -50,7 +51,6 @@ export default function EditMyBusinessPage() {
       try {
         const { success, service } = await BusinessService.getMyBusiness();
         if (!success) throw new Error('No se pudo cargar tu negocio');
-        // rellenar form con datos existentes
         setForm({
           name: service.name || '',
           description: service.description || '',
@@ -76,7 +76,6 @@ export default function EditMyBusinessPage() {
       }
     };
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => {
@@ -138,108 +137,259 @@ export default function EditMyBusinessPage() {
     }
   };
 
-  if (loading || authLoading) return <div><Navbar /><main><p>Cargando…</p></main></div>;
+  if (loading || authLoading) {
+    return (
+      <div className={styles.page}>
+        <Navbar />
+        <main className={styles.main}>
+          <div className={styles.loading}>
+            <div className={styles.spinner}></div>
+            <p className={styles.loadingText}>Cargando información...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className={styles.page}>
       <Navbar />
-      <main>
-        <h1>Editar mi Negocio</h1>
-        {msg && <div style={{color:'green'}}>{msg}</div>}
-        {error && <div style={{color:'crimson'}}>{error}</div>}
+      <main className={styles.main}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Editar mi Negocio</h1>
+          <p className={styles.subtitle}>Actualiza la información de tu negocio</p>
+        </div>
 
-        <form onSubmit={onSubmit}>
-          {/* Básicos */}
-          <div>
-            <label>Nombre *</label>
-            <input name="name" value={form.name} onChange={onChange} required />
-          </div>
-          <div>
-            <label>Categoría *</label>
-            <select name="category" value={form.category} onChange={onChange} required>
-              <option value="">Selecciona</option>
-              <option value="restaurante">Restaurante</option>
-              <option value="comida_bebidas">Cafetería / Panadería / Pastelería</option>
-              <option value="centro_salud">Centro de Salud</option>
-              <option value="farmacia">Farmacia</option>
-              <option value="veterinaria">Veterinaria / Pet Shop</option>
-              <option value="minimarket">Minimarket</option>
-              <option value="supermercado">Supermercado</option>
-              <option value="hotel">Hotel / Hospedaje</option>
-              <option value="gimnasio">Gimnasio</option>
-              <option value="escuela_baile">Escuela de Baile</option>
-              <option value="taller_mecanico">Taller Mecánico</option>
-              <option value="lavanderia">Lavandería</option>
-              <option value="barberia">Barbería</option>
-              <option value="salon_belleza">Salón de Belleza</option>
-              <option value="discoteca">Discoteca / Night Club</option>
-              <option value="otros">Otros</option>
-            </select>
-          </div>
-          <div>
-            <label>Descripción *</label>
-            <textarea name="description" rows={3} value={form.description} onChange={onChange} required />
-          </div>
-          {/* Qué ofreces */}
-          <div>
-            <label>¿Qué ofreces? (palabras clave)</label>
-            <textarea name="offerings" rows={2} value={form.offerings || ''} onChange={onChange} />
-          </div>
+        {msg && <div className={styles.successMessage}>{msg}</div>}
+        {error && <div className={styles.errorMessage}>{error}</div>}
+
+        <form onSubmit={onSubmit} className={styles.form}>
+          {/* Información Básica */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Building2 size={20} /></span>
+              Información Básica
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Nombre del Negocio</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={onChange}
+                className={styles.input}
+                placeholder="Ej: Restaurante El Buen Sabor"
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Categoría</label>
+              <select name="category" value={form.category} onChange={onChange} className={styles.select} required>
+                <option value="">Selecciona una categoría</option>
+                <option value="restaurante">Restaurante</option>
+                <option value="comida_bebidas">Cafetería / Panadería / Pastelería</option>
+                <option value="centro_salud">Centro de Salud</option>
+                <option value="farmacia">Farmacia</option>
+                <option value="veterinaria">Veterinaria / Pet Shop</option>
+                <option value="minimarket">Minimarket</option>
+                <option value="supermercado">Supermercado</option>
+                <option value="hotel">Hotel / Hospedaje</option>
+                <option value="gimnasio">Gimnasio</option>
+                <option value="escuela_baile">Escuela de Baile</option>
+                <option value="taller_mecanico">Taller Mecánico</option>
+                <option value="lavanderia">Lavandería</option>
+                <option value="barberia">Barbería</option>
+                <option value="salon_belleza">Salón de Belleza</option>
+                <option value="discoteca">Discoteca / Night Club</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Descripción</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={onChange}
+                className={styles.textarea}
+                placeholder="Describe tu negocio..."
+                required
+              />
+              <span className={styles.hint}>Cuéntale a tus clientes qué hace especial a tu negocio</span>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>¿Qué ofreces?</label>
+              <textarea
+                name="offerings"
+                value={form.offerings || ''}
+                onChange={onChange}
+                className={styles.textarea}
+                placeholder="Ej: pizza, pasta, comida italiana, delivery"
+              />
+              <span className={styles.hint}>Palabras clave que ayuden a los clientes a encontrarte</span>
+            </div>
+          </section>
 
           {/* Contacto */}
-          <div>
-            <label>Teléfono *</label>
-            <input name="phone" value={form.phone} onChange={onChange} required />
-          </div>
-          <div>
-            <label>Email (no editable)</label>
-            <input name="email" value={form.email} onChange={onChange} disabled />
-          </div>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Phone size={20} /></span>
+              Información de Contacto
+            </h2>
 
-          {/* Mapa */}
-          <div style={{ marginTop: 16 }}>
-            <label>Ubicación *</label>
-            <MapPicker
-              initialCenter={coords || { lat: -12.0464, lng: -77.0428 }}
-              value={coords}
-              onChange={setCoords}
-              height="320px"
-            />
-            <div style={{ marginTop: 8, fontSize: 13 }}>
-              {coords ? <>Coords: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</> : <span style={{color:'#d00'}}>Selecciona la ubicación</span>}
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Teléfono</label>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={onChange}
+                className={styles.input}
+                placeholder="+51 999 999 999"
+                required
+              />
             </div>
-          </div>
 
-          {/* Dirección opcional */}
-          <div style={{ marginTop: 16 }}>
-            <label>Dirección (opcional)</label>
-            <input name="address.street" placeholder="Calle y número" value={form.address?.street || ''} onChange={onChange} />
-            <input name="address.district" placeholder="Distrito" value={form.address?.district || ''} onChange={onChange} />
-            <input name="address.city" placeholder="Ciudad" value={form.address?.city || ''} onChange={onChange} />
-            <input name="address.reference" placeholder="Referencia" value={form.address?.reference || ''} onChange={onChange} />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Email</label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={onChange}
+                className={styles.input}
+                disabled
+              />
+              <span className={styles.hint}>El email no puede ser modificado</span>
+            </div>
+          </section>
 
-          {/* Reemplazo de imágenes */}
-          <div style={{ marginTop: 16 }}>
-            <label>Reemplazar imágenes (exactamente 3, 2MB c/u) — si no seleccionas, se conservan</label>
-            <input type="file" multiple accept="image/*" onChange={onImages} />
-          </div>
+          {/* Ubicación */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><MapPin size={20} /></span>
+              Ubicación
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={`${styles.label} ${styles.required}`}>Selecciona tu ubicación en el mapa</label>
+              <div className={styles.mapContainer}>
+                <MapPicker
+                  initialCenter={coords || { lat: -12.0464, lng: -77.0428 }}
+                  value={coords}
+                  onChange={setCoords}
+                  height="320px"
+                />
+              </div>
+              <div className={`${styles.coordsInfo} ${!coords ? styles.warning : ''}`}>
+                <MapPin size={16} />
+                {coords
+                  ? `Coordenadas: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`
+                  : 'Haz clic en el mapa para seleccionar tu ubicación'}
+              </div>
+            </div>
+
+            <div className={styles.addressGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Calle y número</label>
+                <input
+                  name="address.street"
+                  placeholder="Av. Principal 123"
+                  value={form.address?.street || ''}
+                  onChange={onChange}
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Distrito</label>
+                <input
+                  name="address.district"
+                  placeholder="Miraflores"
+                  value={form.address?.district || ''}
+                  onChange={onChange}
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Ciudad</label>
+                <input
+                  name="address.city"
+                  placeholder="Lima"
+                  value={form.address?.city || ''}
+                  onChange={onChange}
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Referencia</label>
+                <input
+                  name="address.reference"
+                  placeholder="Cerca al parque central"
+                  value={form.address?.reference || ''}
+                  onChange={onChange}
+                  className={styles.input}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Imágenes */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Image size={20} /></span>
+              Imágenes
+            </h2>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Reemplazar imágenes</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={onImages}
+                className={styles.fileInput}
+              />
+              <span className={styles.hint}>
+                Selecciona exactamente 3 imágenes (máximo 2MB cada una). Si no seleccionas ninguna, se conservarán las actuales.
+              </span>
+            </div>
+          </section>
 
           {/* Horarios */}
-          <div style={{ marginTop: 16 }}>
-            <label>Horario</label>
-            {Object.entries(form.schedule).map(([day, sch]: any) => (
-              <div key={day}>
-                <span style={{ display:'inline-block', width:110 }}>{day}:</span>
-                <input type="time" value={sch.open} onChange={(e)=>onSchedule(day,'open',e.target.value)} />
-                <span> a </span>
-                <input type="time" value={sch.close} onChange={(e)=>onSchedule(day,'close',e.target.value)} />
-              </div>
-            ))}
-          </div>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}><Clock size={20} /></span>
+              Horario de Atención
+            </h2>
 
-          <button type="submit" disabled={saving}>
-            {saving ? 'Guardando…' : 'Guardar cambios'}
+            <div className={styles.scheduleGrid}>
+              {Object.entries(form.schedule).map(([day, sch]: any) => (
+                <div key={day} className={styles.scheduleRow}>
+                  <span className={styles.dayLabel}>{day}</span>
+                  <input
+                    type="time"
+                    value={sch.open}
+                    onChange={(e) => onSchedule(day, 'open', e.target.value)}
+                    className={styles.timeInput}
+                  />
+                  <span className={styles.timeSeparator}>a</span>
+                  <input
+                    type="time"
+                    value={sch.close}
+                    onChange={(e) => onSchedule(day, 'close', e.target.value)}
+                    className={styles.timeInput}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className={styles.hint}>Deja los campos vacíos para días cerrados</span>
+          </section>
+
+          <button type="submit" disabled={saving} className={styles.submitButton}>
+            {saving ? 'Guardando cambios...' : 'Guardar Cambios'}
           </button>
         </form>
       </main>

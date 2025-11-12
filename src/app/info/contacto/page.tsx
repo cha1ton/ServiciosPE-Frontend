@@ -1,7 +1,8 @@
 // src/app/info/contacto/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import BackButton from "@/components/BackButton";
+import { Mail, HelpCircle, ArrowLeft } from "lucide-react";
+import styles from "../info.module.css";
 
 export const metadata: Metadata = {
   title: "Contacto - ServiciosPE",
@@ -10,24 +11,80 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
-      <h1>Contacto</h1>
-      <p>¿Dudas, problemas o propuestas? Responderemos pronto.</p>
-      <ul>
-        <li>Email general: <a href="mailto:contacto@serviciospe.pe">contacto@serviciospe.pe</a></li>
-        <li>Soporte: <a href="mailto:soporte@serviciospe.pe">soporte@serviciospe.pe</a></li>
-      </ul>
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <a href="mailto:contacto@serviciospe.pe" style={{ padding: "10px 14px", border: "1px solid #ddd", borderRadius: 8 }}>
-          Escribir a Contacto
-        </a>
-        <a href="mailto:soporte@serviciospe.pe" style={{ padding: "10px 14px", border: "1px solid #ddd", borderRadius: 8 }}>
-          Escribir a Soporte
-        </a>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.iconBadge}>
+            <Mail size={32} strokeWidth={2} />
+          </div>
+          <h1 className={styles.title}>Contacto</h1>
+          <p className={styles.headerSubtitle}>
+            ¿Dudas, problemas o propuestas? Responderemos pronto
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className={styles.content}>
+          <div className={styles.section}>
+            <div className={styles.contactGrid}>
+              <div className={styles.contactCard}>
+                <div className={styles.contactIcon}>
+                  <Mail size={24} />
+                </div>
+                <h3 className={styles.contactTitle}>Email general</h3>
+                <a 
+                  href="mailto:contacto@serviciospe.pe" 
+                  className={styles.contactEmail}
+                >
+                  contacto@serviciospe.pe
+                </a>
+                <p className={styles.contactDesc}>
+                  Para consultas generales, sugerencias y alianzas
+                </p>
+              </div>
+
+              <div className={styles.contactCard}>
+                <div className={styles.contactIcon}>
+                  <HelpCircle size={24} />
+                </div>
+                <h3 className={styles.contactTitle}>Soporte técnico</h3>
+                <a 
+                  href="mailto:soporte@serviciospe.pe" 
+                  className={styles.contactEmail}
+                >
+                  soporte@serviciospe.pe
+                </a>
+                <p className={styles.contactDesc}>
+                  Para problemas técnicos y ayuda con la plataforma
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <a 
+              href="mailto:contacto@serviciospe.pe" 
+              className={styles.primaryBtn}
+            >
+              <Mail size={18} />
+              Escribir a Contacto
+            </a>
+            <a 
+              href="mailto:soporte@serviciospe.pe" 
+              className={styles.secondaryBtn}
+            >
+              <HelpCircle size={18} />
+              Escribir a Soporte
+            </a>
+          </div>
+
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={18} />
+            Volver al inicio
+          </Link>
+        </div>
       </div>
-      <p style={{marginTop:8}}>
-        <Link href="/">← Volver al inicio</Link>
-      </p>
-    </main>
+    </div>
   );
 }

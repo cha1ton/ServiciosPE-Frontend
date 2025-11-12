@@ -1,0 +1,258 @@
+/* ===== FONDO EN TODA LA PANTALLA ===== */
+.page {
+  min-height: 100svh;
+  background: url("https://t3.ftcdn.net/jpg/04/49/73/64/360_F_449736488_IAGo58o7DloC8Os5S5v9vppX3BIxzK4S.jpg") center/cover no-repeat fixed;
+  background-color: #4285f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Centro absoluto del card */
+.centerWrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== CARD HORIZONTAL ===== */
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 50px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 900px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: center;
+}
+
+/* ===== SECCIÓN IZQUIERDA ===== */
+.leftSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.planetContainer {
+  width: 240px;
+  height: 240px;
+  margin-bottom: 30px;
+}
+
+.planetGif {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.serviceIcons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.serviceIcon {
+  text-align: center;
+}
+
+.serviceIconCircle {
+  width: 70px;
+  height: 70px;
+  background: #f0f4ff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  transition: all 0.3s ease;
+  color: #4285f4;
+}
+
+.serviceIconCircle:hover {
+  background: #e0e9ff;
+  transform: translateY(-3px);
+}
+
+.serviceIconLabel {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* ===== SECCIÓN DERECHA ===== */
+.rightSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo {
+  background: #1a1a1a;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.welcomeTitle {
+  font-size: 1.75rem;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.welcomeText {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* ===== BOTÓN GOOGLE ===== */
+.googleBtn {
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #4285f4;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.googleBtn:hover {
+  background: #357ae8;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+}
+
+.googleBtn:active {
+  transform: translateY(0);
+}
+
+.googleBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== LEGALES ===== */
+.terms {
+  text-align: center;
+  margin-top: 0;
+  font-size: 0.8rem;
+  color: #999;
+  line-height: 1.4;
+}
+
+.link {
+  color: #4285f4;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ===== LOADING SCREEN ===== */
+.loadingScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page {
+    padding: 10px;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 30px 25px;
+    max-width: 400px;
+  }
+
+  .leftSection {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .planetContainer {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 0;
+  }
+
+  /* OCULTAR ICONOS EN MÓVIL */
+  .serviceIcons {
+    display: none;
+  }
+
+  .rightSection {
+    width: 100%;
+  }
+
+  .logo {
+    margin: 0 auto 20px;
+  }
+
+  .welcomeTitle {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .welcomeText {
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  .googleBtn {
+    font-size: 0.9rem;
+    padding: 12px 20px;
+  }
+
+  .terms {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 25px 20px;
+  }
+
+  .planetContainer {
+    width: 130px;
+    height: 130px;
+  }
+
+  .welcomeTitle {
+    font-size: 1.3rem;
+  }
+}
