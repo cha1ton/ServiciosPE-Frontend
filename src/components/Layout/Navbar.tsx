@@ -51,6 +51,22 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  function normalizeGooglePhoto(url: string, sz = 128) {
+  try {
+    const u = new URL(url);
+    // soporta ?sz=, o sufijos tipo "=s96-c"
+    if (u.searchParams.has('sz')) {
+      u.searchParams.set('sz', String(sz));
+      return u.toString();
+    }
+    // reemplaza sufijo =sXX-... si existe
+    return url.replace(/=s\d+-[a-z]/i, `=s${sz}-c`);
+  } catch {
+    return url;
+  }
+}
+
+
   // ✅ CORRECCIÓN: Manejar correctamente customPhoto (base64) y photo (URL)
   useEffect(() => {
     if (user) {
@@ -74,7 +90,7 @@ export default function Navbar() {
         setAvatarUrl(photoUrl);
       } else if (user.photo) {
         console.log("✅ Usando foto de Google");
-        setAvatarUrl(user.photo);
+        setAvatarUrl(normalizeGooglePhoto(user.photo, 128));
       } else {
         console.log("ℹ️ Usando avatar por defecto");
         setAvatarUrl("/default-avatar.png");
@@ -82,13 +98,16 @@ export default function Navbar() {
     }
   }, [user]);
 
-  // Función para manejar errores de carga de imagen
-  const handleImageError = (
-    e: React.SyntheticEvent<HTMLImageElement, Event>
-  ) => {
-    console.log("❌ Error cargando imagen, usando avatar por defecto");
-    e.currentTarget.src = "/default-avatar.png";
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.dataset.retry !== '1' && img.src.includes('googleusercontent')) {
+      img.dataset.retry = '1';
+      img.src = normalizeGooglePhoto(img.src, 256); // segundo intento con otro tamaño
+      return;
+    }
+    img.src = "/default-avatar.png";
   };
+
 
   // Obtener respuestas no leídas
   useEffect(() => {
@@ -282,10 +301,8 @@ export default function Navbar() {
                 src={avatarUrl}
                 alt="Perfil"
                 className={styles.avatar}
+                referrerPolicy="no-referrer"
                 onError={handleImageError}
-                onLoad={() =>
-                  console.log("✅ Imagen cargada correctamente en navbar")
-                }
               />
             </button>
 
