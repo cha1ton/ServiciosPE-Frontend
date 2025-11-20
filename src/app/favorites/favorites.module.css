@@ -1,4 +1,4 @@
-/* ===== PAGE CONTAINER ===== */
+/*PAGE CONTAINER */
 .page {
   min-height: 100vh;
   background: #f8f9fa;
@@ -10,7 +10,7 @@
   padding: 40px 24px;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 .header {
   margin-bottom: 32px;
 }
@@ -103,7 +103,7 @@
   box-shadow: 0 6px 20px rgba(66, 133, 244, 0.35);
 }
 
-/* ===== LOADING STATE ===== */
+
 .loading {
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@
   font-weight: 600;
 }
 
-/* ===== ERROR MESSAGE ===== */
+
 .errorMessage {
   padding: 16px 20px;
   background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);

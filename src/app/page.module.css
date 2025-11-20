@@ -1,366 +1,612 @@
-/* ===== PAGE ===== */
-.page {
+/* frontend/src/app/page.module.css */
+
+.landingPage {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
+}
+
+.landingMain {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== HERO SECTION ===== */
+.heroSection {
+  padding: 80px 0 100px 0;
   position: relative;
 }
 
-.main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-/* ===== LOCATION BANNER ===== */
-.locationBanner {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 14px 18px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-}
-
-.locationContent {
-  display: flex;
+.heroContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
   align-items: center;
-  gap: 10px;
-  color: #444;
-  font-size: 0.95rem;
 }
 
-.locationIcon {
-  color: #4285f4;
-  flex-shrink: 0;
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.locationText {
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 50px;
+  font-size: 0.9rem;
   font-weight: 600;
+  width: fit-content;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Título */
+.heroTitle {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1.15;
   color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.locationError {
-  display: flex;
+.highlight {
+  color: #10b981;
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSubtitle {
+  font-size: 1.35rem;
+  line-height: 1.8;
+  color: #555;
+  margin: 0;
+}
+
+.heroSubtitle strong {
+  color: #10b981;
+  font-weight: 700;
+}
+
+/* CTA Button Principal */
+.ctaButton {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: #d32f2f;
-  font-size: 0.95rem;
-  flex-wrap: wrap;
-}
-
-.locationIconError {
-  color: #d32f2f;
-  flex-shrink: 0;
-}
-
-.retryButton {
-  padding: 4px 12px;
-  background: #4285f4;
+  gap: 12px;
+  padding: 20px 40px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.retryButton:hover {
-  background: #357ae8;
-}
-
-.errorText {
-  width: 100%;
-  font-size: 0.85rem;
-  margin-top: 4px;
-}
-
-/* ============================================
-   BADGE DE UBICACIÓN FLOTANTE
-   ============================================ */
-
-/* Badge flotante en la esquina inferior izquierda */
-.locationBadge {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #4285f4;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 999;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Estado contraído (después de 5 segundos) */
-.locationBadge.collapsed {
-  width: 40px;
-  padding: 8px;
-  gap: 0;
-}
-
-.locationBadge.collapsed .locationBadgeText {
-  opacity: 0;
-  width: 0;
-  transform: translateX(-10px);
-}
-
-/* Expansión al hover */
-.locationBadge:hover {
-  width: auto;
-  padding: 8px 16px;
-  gap: 6px;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.locationBadge:hover .locationBadgeText {
-  opacity: 1;
-  width: auto;
-  transform: translateX(0);
-}
-
-/* Texto del badge con transición */
-.locationBadgeText {
-  transition: all 0.3s ease;
-  display: inline-block;
-  color: #1a1a1a;
-}
-
-.locationBadge .coords {
-  font-size: 11px;
-  color: #666;
-  margin-left: 4px;
-}
-
-/* ============================================
-   MENSAJE DE BIENVENIDA
-   ============================================ */
-
-.welcomeMessage {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  max-width: 400px;
-  width: auto;
-  animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.3) translateY(-50px);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.05) translateY(0);
-  }
-  70% {
-    transform: translateX(-50%) scale(0.95) translateY(0);
-  }
-  100% {
-    transform: translateX(-50%) scale(1) translateY(0);
-  }
-}
-
-.welcomeMessageContent {
-  background: linear-gradient(135deg, #4285f4 0%, #357ae8 100%);
-  color: white;
-  padding: 14px 20px;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  font-weight: 600;
-  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+  align-self: flex-start;
   position: relative;
   overflow: hidden;
 }
 
-/* Efecto de brillo que cruza el mensaje */
-.welcomeMessageContent::before {
+.ctaButton::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  animation: shine 2s ease-in-out infinite;
-  animation-delay: 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
 }
 
-@keyframes shine {
-  0% {
-    left: -100%;
-  }
-  50%, 100% {
-    left: 100%;
-  }
+.ctaButton:hover::before {
+  left: 100%;
 }
 
-.welcomeMessageClose {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 8px;
-  padding: 4px;
-  cursor: pointer;
+.ctaButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.45);
+}
+
+.ctaButton:active {
+  transform: translateY(-1px);
+}
+
+.ctaArrow {
+  transition: transform 0.3s ease;
+}
+
+.ctaButton:hover .ctaArrow {
+  transform: translateX(4px);
+}
+
+/* Mini Features */
+.miniFeatures {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.miniFeature {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  color: white;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.welcomeMessageClose:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1) rotate(90deg);
-}
-
-/* ===== RESULTS SECTION ===== */
-.resultsSection {
-  margin-top: 24px;
-}
-
-.resultsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-/* ===== LOADING ===== */
-.loadingMessage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 20px;
+  gap: 8px;
   color: #666;
-  font-size: 1rem;
-}
-
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #e0e0e0;
-  border-top-color: #4285f4;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===== EMPTY STATE ===== */
-.emptyState {
-  padding: 40px 20px;
-  text-align: center;
-  background: white;
-  border: 2px dashed #e0e0e0;
-  border-radius: 12px;
-  color: #666;
-  font-size: 1rem;
-}
-
-/* ===== ERROR MESSAGE ===== */
-.errorMessage {
-  padding: 16px 20px;
-  background: #ffebee;
-  border: 1px solid #ef5350;
-  border-radius: 12px;
-  color: #c62828;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* ===== AD CARD ===== */
-.adCard {
-  margin-top: 12px;
+.miniFeature svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* Hero Image */
+.heroImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.mapGif {
+  width: 100%;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Floating Cards */
+.floatingCard1,
+.floatingCard2 {
+  position: absolute;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.floatingCard1 {
+  top: 15%;
+  left: -40px;
+}
+
+.floatingCard2 {
+  bottom: 15%;
+  right: -40px;
+  animation-delay: 2s;
+}
+
+.floatingCard1 svg,
+.floatingCard2 svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.floatingCard1 div,
+.floatingCard2 div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.floatingCard1 strong,
+.floatingCard2 strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.floatingCard1 span,
+.floatingCard2 span {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+@keyframes floatCard {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* ===== FEATURES SECTION ===== */
+.featuresSection {
+  padding: 80px 0;
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 32px;
+  margin: 40px 0;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+.sectionSubtitle {
+  font-size: 1.25rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  padding: 0 20px;
+}
+
+.featureCard {
+  background: white;
+  padding: 36px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.featureCard:hover {
+  transform: translateY(-8px);
+  border-color: #10b981;
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.15);
+}
+
+.featureIcon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.featureCard h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+}
+
+.featureCard p {
+  font-size: 1.05rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* ===== CATEGORIES SECTION ===== */
+.categoriesSection {
+  padding: 80px 0;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+}
+
+.categoryCard {
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+
+.categoryCard:hover {
+  transform: translateY(-8px);
+  border-color: #10b981;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.15);
+}
+
+.categoryIconWrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  margin: 0 auto 20px auto;
+  transition: all 0.3s ease;
+}
+
+.categoryCard:hover .categoryIconWrapper {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  transform: scale(1.1);
+}
+
+.categoryCard h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+}
+
+.categoryCard p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ===== CTA SECTION ===== */
+.ctaSection {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 32px;
+  margin: 60px 0;
+}
+
+.ctaContent {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.ctaTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ctaSubtitle {
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 40px 0;
+  line-height: 1.6;
+}
+
+.ctaButtonLarge {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 48px;
+  background: white;
+  color: #10b981;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.ctaButtonLarge:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.ctaButtonLarge:hover .ctaArrow {
+  transform: translateX(6px);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: #1a1a1a;
+  padding: 40px 0;
+  margin-top: 80px;
+}
+
+.footerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.footerContent p {
+  color: #999;
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+
+  .floatingCard1,
+  .floatingCard2 {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
-  .resultsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+
+  .heroTitle {
+    font-size: 3rem;
+  }
+
+  .heroImage {
+    order: -1;
+  }
+
+  .mapGif {
+    max-width: 500px;
+  }
+
+  .sectionTitle {
+    font-size: 2.5rem;
+  }
+
+  .ctaTitle {
+    font-size: 2.8rem;
   }
 }
 
 @media (max-width: 768px) {
-  .main {
-    padding: 16px;
+  .heroSection {
+    padding: 60px 0 80px 0;
   }
 
-  .resultsGrid {
-    grid-template-columns: 1fr;
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.15rem;
+  }
+
+  .ctaButton {
+    width: 100%;
+    justify-content: center;
+    padding: 18px 32px;
+  }
+
+  .miniFeatures {
+    flex-direction: column;
     gap: 16px;
   }
 
-  .locationBanner {
-    padding: 12px 16px;
+  .sectionTitle {
+    font-size: 2rem;
   }
 
-  .locationContent,
-  .locationError {
-    font-size: 0.9rem;
+  .sectionSubtitle {
+    font-size: 1.1rem;
   }
 
-  /* Badge de ubicación en móvil */
-  .locationBadge {
-    bottom: 16px;
-    left: 12px;
-    font-size: 12px;
-    padding: 6px 12px;
+  .featuresGrid,
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  /* Mensaje de bienvenida en móvil */
-  .welcomeMessage {
-    top: 70px;
-    width: 90%;
+  .ctaTitle {
+    font-size: 2.2rem;
   }
 
-  .welcomeMessageContent {
-    padding: 12px 16px;
-    font-size: 14px;
+  .ctaSubtitle {
+    font-size: 1.15rem;
+  }
+
+  .ctaButtonLarge {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .main {
-    padding: 12px;
+  .landingMain {
+    padding: 0 16px;
   }
 
-  .locationBanner {
-    padding: 10px 14px;
+  .heroTitle {
+    font-size: 2rem;
   }
 
-  .resultsSection {
-    margin-top: 20px;
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    padding: 8px 16px;
+  }
+
+  .ctaButton {
+    font-size: 1rem;
+    padding: 16px 28px;
+  }
+
+  .mapGif {
+    max-width: 100%;
+  }
+
+  .sectionTitle {
+    font-size: 1.75rem;
+  }
+
+  .featureCard,
+  .categoryCard {
+    padding: 24px;
+  }
+
+  .featureIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .categoryIconWrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ctaSection {
+    padding: 60px 0;
+  }
+
+  .ctaTitle {
+    font-size: 1.8rem;
+  }
+
+  .ctaSubtitle {
+    font-size: 1rem;
+  }
+
+  .ctaButtonLarge {
+    font-size: 1.05rem;
+    padding: 18px 32px;
   }
 }

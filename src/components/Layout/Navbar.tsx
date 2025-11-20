@@ -17,7 +17,8 @@ import {
   Settings, 
   Mail, 
   LogOut,
-  MessageCircle
+  MessageCircle,
+  Search
 } from "lucide-react";
 
 
@@ -220,6 +221,12 @@ export default function Navbar() {
     setIsMenuOpen(false);
   };
 
+  // ✅ NUEVA FUNCIÓN: Navegar a Servicios
+  const handleServices = () => {
+    router.push("/negocios");
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
@@ -230,6 +237,12 @@ export default function Navbar() {
 
         {/* Enlaces visibles en DESKTOP (ocultos en móvil) */}
         <div className={styles.desktopLinks}>
+          {/* ✅ NUEVO ENLACE: Servicios */}
+          <button onClick={handleServices} className={styles.navLink}>
+            <Search size={18} />
+            <span>Servicios</span>
+          </button>
+
           {user?.role === "provider" && (
             <button onClick={handleViewMyBusiness} className={styles.navLink}>
               <MessageCircle size={18} />
@@ -321,6 +334,12 @@ export default function Navbar() {
                 <div className={styles.menuItems}>
                   {/* Enlaces para MÓVIL ÚNICAMENTE (solo se ven en móvil) */}
                   <div className={styles.mobileOnlyLinks}>
+                    {/* ✅ NUEVO ENLACE MÓVIL: Servicios */}
+                    <button onClick={handleServices} className={styles.menuItem}>
+                      <Search size={18} />
+                      <span>Servicios</span>
+                    </button>
+
                     {user?.role === "provider" && (
                       <button onClick={handleViewMyBusiness} className={styles.menuItem}>
                         <MessageCircle size={18} />
@@ -346,7 +365,7 @@ export default function Navbar() {
                     <User size={18} />
                     <span>Mi Perfil</span>
                   </button>
-
+                    
                   <button onClick={handleFavorites} className={styles.menuItem}>
                     <Heart size={18} />
                     <span>Favoritos</span>

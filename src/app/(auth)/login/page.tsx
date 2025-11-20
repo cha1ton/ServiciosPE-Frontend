@@ -34,7 +34,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.centerWrap}>
         <div className={styles.card}>
-          {/* Sección Izquierda: Planeta + Iconos */}
+          {}
           <div className={styles.leftSection}>
             <div className={styles.planetContainer}>
               <img 
@@ -72,7 +72,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Sección Derecha: Login */}
+          {}
           <div className={styles.rightSection}>
             <div className={styles.logo}>ServiciosPE</div>
             <h2 className={styles.welcomeTitle}>Bienvenido</h2>

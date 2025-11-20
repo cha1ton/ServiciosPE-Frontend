@@ -1,4 +1,4 @@
-/* ===== FONDO IGUAL AL LOGIN ===== */
+
 .page {
   min-height: 100vh;
   background: url("https://t3.ftcdn.net/jpg/04/49/73/64/360_F_449736488_IAGo58o7DloC8Os5S5v9vppX3BIxzK4S.jpg") center/cover no-repeat fixed;
@@ -9,7 +9,7 @@
   padding: 20px;
 }
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
+
 .container {
   background: #ffffff;
   border-radius: 20px;
@@ -20,7 +20,7 @@
   text-align: center;
 }
 
-/* ===== GIF DE UBICACIÓN ===== */
+
 .iconContainer {
   width: 180px;
   height: 180px;
@@ -36,7 +36,7 @@
   object-fit: contain;
 }
 
-/* ===== TEXTOS ===== */
+
 .title {
   font-size: 1.75rem;
   color: #1a1a1a;
@@ -51,7 +51,7 @@
   line-height: 1.5;
 }
 
-/* ===== BARRA DE PROGRESO ===== */
+
 .progressBar {
   position: relative;
   height: 8px;
@@ -91,7 +91,7 @@
   }
 }
 
-/* ===== TEXTO INFERIOR ===== */
+
 .hint {
   color: #999;
   font-size: 0.85rem;
@@ -107,7 +107,7 @@
   font-size: 1rem;
 }
 
-/* ===== RESPONSIVE ===== */
+
 @media (max-width: 768px) {
   .page {
     padding: 15px;
