@@ -28,7 +28,6 @@ export type CategoryKey =
   | "farmacia"
   | "veterinaria"
   | "supermercado"
-  | "minimarket"
   | "hotel"
   | "gimnasio"
   | "lavanderia"
@@ -44,8 +43,7 @@ const CATEGORIES: { key: CategoryKey; label: string; icon: React.ReactNode }[] =
   { key: "centro_salud", label: "Salud", icon: <Hospital size={16} /> },
   { key: "farmacia", label: "Farmacias", icon: <Pill size={16} /> },
   { key: "veterinaria", label: "Veterinarias", icon: <PawPrint size={16} /> },
-  { key: "supermercado", label: "Supermercados", icon: <ShoppingCart size={16} /> },
-  { key: "minimarket", label: "Minimarkets", icon: <Store size={16} /> },
+  { key: "supermercado", label: "Super/Minimarket", icon: <ShoppingCart size={16} /> },
   { key: "hotel", label: "Hoteles", icon: <Hotel size={16} /> },
   { key: "gimnasio", label: "Gimnasios", icon: <Dumbbell size={16} /> },
   { key: "lavanderia", label: "Lavanderías", icon: <Shirt size={16} /> },

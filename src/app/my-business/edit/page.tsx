@@ -192,7 +192,6 @@ export default function EditMyBusinessPage() {
                 <option value="centro_salud">Centro de Salud</option>
                 <option value="farmacia">Farmacia</option>
                 <option value="veterinaria">Veterinaria / Pet Shop</option>
-                <option value="minimarket">Minimarket</option>
                 <option value="supermercado">Supermercado</option>
                 <option value="hotel">Hotel / Hospedaje</option>
                 <option value="gimnasio">Gimnasio</option>

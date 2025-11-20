@@ -17,7 +17,6 @@ const CATEGORIES = [
   { value: "centro_salud", label: "Centro de Salud" },
   { value: "farmacia", label: "Farmacia" },
   { value: "veterinaria", label: "Veterinaria / Pet Shop" },
-  { value: "minimarket", label: "Minimarket" },
   { value: "supermercado", label: "Supermercado" },
   { value: "hotel", label: "Hotel / Hospedaje" },
   { value: "gimnasio", label: "Gimnasio" },
