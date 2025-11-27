@@ -31,6 +31,8 @@ export default function Navbar() {
   const [unreadItems, setUnreadItems] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const roleLabel = user?.role === "admin" ? "Administrador" 
+  : user?.role === "provider" ? "Proveedor" : "Usuario";
 
   // ✅ AGREGAR ESTO PARA DEBUG
   useEffect(() => {
@@ -259,6 +261,16 @@ export default function Navbar() {
             <Settings size={18} />
             <span>Cómo funciona</span>
           </button>
+
+            {user?.role === "admin" && (
+          <button
+            onClick={() => router.push("/admin")}
+            className={styles.navLink}
+          >
+            <Settings size={18} />
+            <span>Admin</span>
+          </button>
+        )}
         </div>
 
         {/* Botones de navegación */}
@@ -327,7 +339,7 @@ export default function Navbar() {
                   </p>
                   <p className={styles.userEmail}>{user?.email}</p>
                   <p className={styles.userRole}>
-                    Rol: {user?.role === "provider" ? "Proveedor" : "Usuario"}
+                    Rol: {roleLabel}
                   </p>
                 </div>
 
@@ -356,6 +368,13 @@ export default function Navbar() {
                       <Settings size={18} />
                       <span>Cómo funciona</span>
                     </button>
+
+                    {user?.role === "admin" && (
+                    <button onClick={() => router.push("/admin")} className={styles.menuItem}>
+                      <Settings size={18} />
+                      <span>Admin</span>
+                    </button>
+                  )}
 
                     <hr className={styles.divider} />
                   </div>
