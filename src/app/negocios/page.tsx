@@ -1,4 +1,4 @@
-// frontend/src/app/page.tsx
+// frontend/src/app/negocios/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -27,25 +27,43 @@ export default function HomePage() {
 
   const { coordinates, locationInfo, getCurrentLocation, loading: geoLoading, error: geoError } = useGeolocation();
 
-  // Estado de filtros / consulta
+  
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryKey | "">("");
   const [distance, setDistance] = useState<DistanceOption>(500);
   const [openNow, setOpenNow] = useState(false);
 
-  // Estado de resultados
+  
   const [results, setResults] = useState<SearchItem[]>([]);
   const [searching, setSearching] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   
-  // Estado para mensajes temporales
+  
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState("");
   
-  // Estado para badge de ubicación contraído
+  
   const [locationBadgeCollapsed, setLocationBadgeCollapsed] = useState(false);
 
-  // Mensajes rotativos para usuarios recurrentes
+  
+  const [categoryCounts, setCategoryCounts] = useState<Record<CategoryKey, number>>({
+    restaurante: 0,
+    comida_bebidas: 0,
+    centro_salud: 0,
+    farmacia: 0,
+    veterinaria: 0,
+    supermercado: 0,
+    hotel: 0,
+    gimnasio: 0,
+    lavanderia: 0,
+    barberia: 0,
+    salon_belleza: 0,
+    taller_mecanico: 0,
+    discoteca: 0,
+    otros: 0,
+  });
+
+  
   const returningMessages = [
     "¡Hola de nuevo!",
     "¿Qué buscas hoy?",
@@ -54,36 +72,36 @@ export default function HomePage() {
     "¿Listo para explorar?",
   ];
 
-  // Pedir ubicación al entrar
+  
   useEffect(() => {
     if (!coordinates && !geoLoading) {
       getCurrentLocation();
     }
   }, []);
 
-  // Pedir/actualizar ubicación cuando el usuario inicia sesión
+  
   useEffect(() => {
     if (!loading && isAuthenticated) {
       getCurrentLocation();
     }
   }, [loading, isAuthenticated]);
 
-  // Determinar mensaje de bienvenida y mostrarlo
+  //  mensaje de bienvenida 
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
-      // Verificar si ya se mostró el mensaje en esta sesión
+      
       const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
       
       if (!hasSeenWelcome) {
-        // Verificar si es la primera vez del usuario (registro reciente)
+        
         const isFirstTime = localStorage.getItem('isFirstTimeUser');
         
         if (isFirstTime === 'true') {
-          // Primera vez - mensaje de bienvenida especial
+          //  mensaje de bienvenida especial
           setWelcomeMessage("¡Bienvenido a ServiciosPE! 🎉");
           localStorage.removeItem('isFirstTimeUser'); // Limpiar flag
         } else {
-          // Usuario recurrente - mensaje rotativo aleatorio
+          // mensaje rotativo aleatorio
           const randomMessage = returningMessages[Math.floor(Math.random() * returningMessages.length)];
           setWelcomeMessage(`${randomMessage} ${user.nickname || user.name}`);
         }
@@ -91,7 +109,7 @@ export default function HomePage() {
         setShowWelcomeMessage(true);
         sessionStorage.setItem('hasSeenWelcome', 'true');
         
-        // Auto-ocultar después de 4 segundos
+        
         const timer = setTimeout(() => {
           setShowWelcomeMessage(false);
         }, 4000);
@@ -99,10 +117,10 @@ export default function HomePage() {
         return () => clearTimeout(timer);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading, isAuthenticated, user]);
 
-  // Contraer badge de ubicación después de 5 segundos (solo cuando el nombre esté cargado)
+  
   useEffect(() => {
     if (coordinates && locationInfo && locationInfo.district) {
       const timer = setTimeout(() => {
@@ -152,7 +170,79 @@ export default function HomePage() {
     }
   };
 
-  // AUTO-FEED
+  
+  useEffect(() => {
+    const loadAllForCounting = async () => {
+      if (!coordinates) return;
+      
+      const counts: Record<CategoryKey, number> = {
+        restaurante: 0,
+        comida_bebidas: 0,
+        centro_salud: 0,
+        farmacia: 0,
+        veterinaria: 0,
+        supermercado: 0,
+        hotel: 0,
+        gimnasio: 0,
+        lavanderia: 0,
+        barberia: 0,
+        salon_belleza: 0,
+        taller_mecanico: 0,
+        discoteca: 0,
+        otros: 0,
+      };
+
+      try {
+        
+        const categories: CategoryKey[] = [
+          "restaurante",
+          "comida_bebidas", 
+          "centro_salud",
+          "farmacia",
+          "veterinaria",
+          "supermercado",
+          "hotel",
+          "gimnasio",
+          "lavanderia",
+          "barberia",
+          "salon_belleza",
+          "taller_mecanico",
+          "discoteca",
+          "otros"
+        ];
+
+        
+        const promises = categories.map(cat => 
+          SearchService.search({
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+            radius: distance,
+            category: cat,
+            page: 1,
+            limit: 100, 
+          }).catch(err => {
+            console.error(`Error buscando ${cat}:`, err);
+            return { results: [] };
+          })
+        );
+
+        const results = await Promise.all(promises);
+
+        
+        categories.forEach((cat, index) => {
+          counts[cat] = results[index].results?.length || 0;
+        });
+
+        setCategoryCounts(counts);
+      } catch (e) {
+        console.error("Error contando categorías:", e);
+      }
+    };
+
+    loadAllForCounting();
+  }, [coordinates?.lat, coordinates?.lng, distance]);
+
+  
   useEffect(() => {
     const run = async () => {
       if (!coordinates) return;
@@ -188,7 +278,7 @@ export default function HomePage() {
     <div className={styles.page}>
       <Navbar />
 
-      {/* Badge de ubicación flotante en la esquina inferior izquierda */}
+      {/* ubicación flotante  */}
       {coordinates && (
         <div className={`${styles.locationBadge} ${locationBadgeCollapsed ? styles.collapsed : ''}`}>
           <MapPin size={14} />
@@ -199,14 +289,11 @@ export default function HomePage() {
                   : locationInfo.district)
               : (locationInfo?.city || 'Detectando ubicación...')}
           </span>
-          {/* Coordenadas comentadas - descomentar si se necesitan para debug */}
-          {/* <span className={styles.coords}>
-            ({coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)})
-          </span> */}
+          
         </div>
       )}
 
-      {/* Mensaje de bienvenida temporal (primera vez en la sesión) */}
+      {/* Mensaje de bienvenida */}
       {showWelcomeMessage && welcomeMessage && (
         <div className={styles.welcomeMessage}>
           <div className={styles.welcomeMessageContent}>
@@ -223,7 +310,7 @@ export default function HomePage() {
       )}
 
       <main className={styles.main}>
-        {/* Estado de geolocalización - SOLO MOSTRAR SI HAY ERROR O ESTÁ CARGANDO */}
+        {/* Estado de geolocalización */}
         {(!coordinates || geoError) && (
           <div className={styles.locationBanner}>
             {geoLoading && (
@@ -245,7 +332,17 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Buscador PRIMERO */}
+        {}
+        <div className={styles.heroSection}>
+          <h1 className={styles.heroTitle}>
+            Descubre Servicios <span className={styles.heroHighlight}>Cerca de Ti</span>
+          </h1>
+          <p className={styles.heroSubtitle}>
+            Encuentra restaurantes, farmacias, hoteles y más en tu zona
+          </p>
+        </div>
+
+        {/* Buscador */}
         <SearchBar
           value={query}
           onChange={setQuery}
@@ -257,13 +354,14 @@ export default function HomePage() {
           disabled={!coordinates}
         />
 
-        {/* Filtros por categoría */}
+        {/* Filtros por categoría*/}
         <CategoryChips
           selected={category || ""}
           onSelect={(k) => setCategory(k === category ? "" : k)}
+          counts={categoryCounts}
         />
 
-        {/* Chat DESPUÉS del buscador */}
+        {}
         <ChatWidget
           coords={coordinates || null}
           defaultDistance={distance}
@@ -277,7 +375,7 @@ export default function HomePage() {
           }}
         />
 
-        {/* Resultados en GRID de 3 columnas */}
+        {}
         <section className={styles.resultsSection}>
           {searching && (
             <div className={styles.loadingMessage}>

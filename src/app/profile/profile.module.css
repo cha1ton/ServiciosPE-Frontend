@@ -1,4 +1,4 @@
-/* ===== CONTENEDOR PRINCIPAL ===== */
+/* CONTENEDOR PRINCIPAL*/
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -10,7 +10,7 @@
   margin: 0 auto;
 }
 
-/* ===== LOADING ===== */
+/*LOADING*/
 .loadingContainer {
   min-height: 100vh;
   display: flex;
@@ -21,7 +21,7 @@
   color: #666;
 }
 
-/* ===== TARJETA DE PERFIL ===== */
+/* TARJETA DE PERFIL*/
 .profileCard {
   background: white;
   border-radius: 20px;
@@ -29,7 +29,7 @@
   overflow: hidden;
 }
 
-/* ===== TÍTULO PRINCIPAL ===== */
+/* TÍTULO PRINCIPAL  */
 .title {
   font-size: 2rem;
   font-weight: 700;
@@ -43,7 +43,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ===== MENSAJES ===== */
+/*MENSAJES*/
 .message {
   margin: 20px 40px 0;
   padding: 14px 18px;
@@ -64,7 +64,7 @@
   border-left: 4px solid #ea4335;
 }
 
-/* ===== FORMULARIO ===== */
+/*  FORMULARIO */
 .form {
   padding: 30px 40px;
 }
@@ -91,7 +91,7 @@
   border-radius: 2px;
 }
 
-/* ===== CAMPOS ===== */
+/*  CAMPOS  */
 .fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -140,7 +140,7 @@
   line-height: 1.4;
 }
 
-/* ===== FOTO DE PERFIL ===== */
+/* FOTO DE PERFIL */
 .photoSection {
   margin-bottom: 30px;
 }
@@ -246,7 +246,7 @@
   transform: none;
 }
 
-/* ===== INFORMACIÓN ADICIONAL ===== */
+/*  INFORMACIÓN ADICIONAL */
 .infoSection {
   padding: 30px 40px 40px;
   background: #f8fafb;
@@ -291,7 +291,7 @@
   border-radius: 6px;
 }
 
-/* ===== RESPONSIVE ===== */
+/*  RESPONSIVE  */
 @media (max-width: 768px) {
   .main {
     padding: 80px 10px 30px;

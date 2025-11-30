@@ -1,4 +1,4 @@
-/* ===== PÁGINA BASE ===== */
+/* PÁGINA BASE */
 .page {
   min-height: 100vh;
   background: #f8f9fa;
@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-/* ===== HEADER ===== */
+/*HEADER*/
 .header {
   background: white;
   padding: 50px 40px 40px;
@@ -52,7 +52,7 @@
   color: #999;
 }
 
-/* ===== CONTENIDO ===== */
+/*CONTENIDO*/
 .content {
   padding: 40px;
 }
@@ -77,7 +77,7 @@
   margin-bottom: 12px;
 }
 
-/* ===== LISTAS ===== */
+/*LISTAS*/
 .list {
   list-style: none;
   padding: 0;
@@ -132,7 +132,7 @@
   font-size: 0.9rem;
 }
 
-/* ===== EMAIL LINKS ===== */
+/*EMAIL LINKS*/
 .email {
   color: #4285f4;
   text-decoration: none;
@@ -145,14 +145,14 @@
   text-decoration: underline;
 }
 
-/* ===== DIVIDER ===== */
+/*DIVIDER*/
 .divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
   margin: 40px 0;
 }
 
-/* ===== CONTACT BOX ===== */
+/*CONTACT BOX*/
 .contactBox {
   background: #f8fafb;
   border: 2px solid #e8eef3;
@@ -184,7 +184,7 @@
   line-height: 1.6;
 }
 
-/* ===== DISCLAIMER ===== */
+/*DISCLAIMER*/
 .disclaimer {
   font-size: 0.85rem;
   color: #999;
@@ -196,7 +196,7 @@
   line-height: 1.5;
 }
 
-/* ===== BACK LINK ===== */
+/*BACK LINK*/
 .backLink {
   display: inline-flex;
   align-items: center;
@@ -215,7 +215,7 @@
   gap: 12px;
 }
 
-/* ===== RESPONSIVE ===== */
+/*RESPONSIVE*/
 @media (max-width: 768px) {
   .page {
     padding: 60px 10px 30px;

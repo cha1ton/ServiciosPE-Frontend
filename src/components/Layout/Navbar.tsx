@@ -15,10 +15,11 @@ import {
   Lock, 
   Info, 
   Settings, 
-  Mail, 
   LogOut,
   MessageCircle,
-  Search
+  Search,
+  Shield,
+  Crown
 } from "lucide-react";
 
 
@@ -262,15 +263,11 @@ export default function Navbar() {
             <span>Cómo funciona</span>
           </button>
 
-            {user?.role === "admin" && (
-          <button
-            onClick={() => router.push("/admin")}
-            className={styles.navLink}
-          >
-            <Settings size={18} />
-            <span>Admin</span>
+          {/* ✅ CAMBIO: Contacto ahora en navbar superior con icono */}
+          <button onClick={handleContact} className={styles.navLink}>
+            <Shield size={18} />
+            <span>Contacto</span>
           </button>
-        )}
         </div>
 
         {/* Botones de navegación */}
@@ -369,12 +366,11 @@ export default function Navbar() {
                       <span>Cómo funciona</span>
                     </button>
 
-                    {user?.role === "admin" && (
-                    <button onClick={() => router.push("/admin")} className={styles.menuItem}>
-                      <Settings size={18} />
-                      <span>Admin</span>
+                    {/* ✅ CAMBIO: Contacto ahora en navbar superior móvil también */}
+                    <button onClick={handleContact} className={styles.menuItem}>
+                      <Shield size={18} />
+                      <span>Contacto</span>
                     </button>
-                  )}
 
                     <hr className={styles.divider} />
                   </div>
@@ -395,10 +391,13 @@ export default function Navbar() {
                     <span>Política de Privacidad</span>
                   </button>
 
-                  <button onClick={handleContact} className={styles.menuItem}>
-                    <Mail size={18} />
-                    <span>Contacto</span>
-                  </button>
+                  {/* ✅ CAMBIO: Admin ahora en el menú desplegable con icono de corona */}
+                  {user?.role === "admin" && (
+                    <button onClick={() => { router.push("/admin"); setIsMenuOpen(false); }} className={styles.menuItem}>
+                      <Crown size={18} />
+                      <span>Admin</span>
+                    </button>
+                  )}
 
                   <hr className={styles.divider} />
 

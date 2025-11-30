@@ -4,6 +4,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Layout/Navbar";
+import styles from "./admin.module.css";
 
 interface AdminUser {
   _id: string;
@@ -28,7 +30,6 @@ interface AdminService {
   };
 }
 
-// 👇 Base del backend (igual que en tus otros servicios)
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function AdminPage() {
@@ -41,10 +42,8 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // aún cargando auth
     if (user === null) return;
 
-    // si no es admin, fuera
     if (!user || user.role !== "admin") {
       router.push("/");
       return;
@@ -55,7 +54,6 @@ export default function AdminPage() {
         setLoading(true);
         setError(null);
 
-        // 🔑 Obtener token del localStorage para el Bearer
         let token: string | null = null;
         if (typeof window !== "undefined") {
           token = localStorage.getItem("token");
@@ -82,8 +80,6 @@ export default function AdminPage() {
         ]);
 
         if (!srvRes.ok || !usrRes.ok) {
-          console.error("srvRes status:", srvRes.status, await srvRes.text());
-          console.error("usrRes status:", usrRes.status, await usrRes.text());
           throw new Error("Error cargando datos de admin");
         }
 
@@ -104,129 +100,177 @@ export default function AdminPage() {
   }, [user, router]);
 
   if (!user || user.role !== "admin") {
-    // mientras redirige
     return null;
   }
 
-  if (loading) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1>Panel de administración</h1>
-        <p>Cargando datos...</p>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1>Panel de administración</h1>
-        <p style={{ color: "red" }}>{error}</p>
-      </main>
-    );
-  }
-
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Panel de administración</h1>
+    <div className={styles.container}>
+      {}
+      <Navbar />
 
-      <div style={{ marginTop: 16, marginBottom: 16 }}>
-        <button
-          onClick={() => setTab("services")}
-          style={{
-            marginRight: 8,
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid #ccc",
-            background: tab === "services" ? "#eee" : "#fff",
-          }}
-        >
-          Negocios ({services.length})
-        </button>
-        <button
-          onClick={() => setTab("users")}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid #ccc",
-            background: tab === "users" ? "#eee" : "#fff",
-          }}
-        >
-          Usuarios ({users.length})
-        </button>
-      </div>
+      {}
+      <main className={styles.main}>
+        {loading ? (
+          <div className={styles.loading}>
+            <div className={styles.spinner} />
+            <p>Cargando datos...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.error}>{error}</div>
+        ) : (
+          <>
+            <div className={styles.header}>
+              <h1 className={styles.title}>Panel de Administración</h1>
+              <p className={styles.subtitle}>
+                Gestiona usuarios y servicios de la plataforma
+              </p>
+            </div>
 
-      {tab === "services" ? (
-        <section>
-          <h2>Negocios registrados</h2>
-          {services.length === 0 ? (
-            <p>No hay servicios registrados.</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Nombre</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Categoría</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Activo</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Propietario</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Creado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((s) => (
-                  <tr key={s._id}>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>{s.name}</td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>{s.category}</td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>
-                      {s.isActive ? "Sí" : "No"}
-                    </td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>
-                      {s.owner ? `${s.owner.name} (${s.owner.email})` : "—"}
-                    </td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>
-                      {new Date(s.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      ) : (
-        <section>
-          <h2>Usuarios registrados</h2>
-          {users.length === 0 ? (
-            <p>No hay usuarios registrados.</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Nombre</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Email</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Rol</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Activo</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: 8 }}>Creado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u._id}>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>{u.name}</td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>{u.email}</td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>{u.role}</td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>
-                      {u.isActive ? "Sí" : "No"}
-                    </td>
-                    <td style={{ borderBottom: "1px solid #f0f0f0", padding: 8 }}>
-                      {new Date(u.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      )}
-    </main>
+            <div className={styles.tabContainer}>
+              <button
+                onClick={() => setTab("services")}
+                className={`${styles.tabButton} ${
+                  tab === "services" ? styles.tabButtonActive : ""
+                }`}
+              >
+                <span>🏪 Negocios</span>
+                <span className={styles.tabCount}>{services.length}</span>
+              </button>
+              <button
+                onClick={() => setTab("users")}
+                className={`${styles.tabButton} ${
+                  tab === "users" ? styles.tabButtonActive : ""
+                }`}
+              >
+                <span>👥 Usuarios</span>
+                <span className={styles.tabCount}>{users.length}</span>
+              </button>
+            </div>
+
+            {tab === "services" ? (
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>Negocios registrados</h2>
+                {services.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <p>No hay servicios registrados.</p>
+                  </div>
+                ) : (
+                  <table className={styles.table}>
+                    <thead className={styles.tableHeader}>
+                      <tr>
+                        <th className={styles.tableHeaderCell}>Nombre</th>
+                        <th className={styles.tableHeaderCell}>Categoría</th>
+                        <th className={styles.tableHeaderCell}>Estado</th>
+                        <th className={styles.tableHeaderCell}>Propietario</th>
+                        <th className={styles.tableHeaderCell}>Fecha Creación</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {services.map((s) => (
+                        <tr key={s._id} className={styles.tableRow}>
+                          <td className={styles.tableCell}>{s.name}</td>
+                          <td className={styles.tableCell}>{s.category}</td>
+                          <td className={styles.tableCell}>
+                            <span
+                              className={`${styles.badge} ${
+                                s.isActive ? styles.badgeActive : styles.badgeInactive
+                              }`}
+                            >
+                              {s.isActive ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
+                          <td className={styles.tableCell}>
+                            {s.owner ? (
+                              <div className={styles.ownerInfo}>
+                                <span className={styles.ownerName}>{s.owner.name}</span>
+                                <span className={styles.ownerEmail}>{s.owner.email}</span>
+                              </div>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          <td className={styles.tableCell}>
+                            <span className={styles.dateText}>
+                              {new Date(s.createdAt).toLocaleString("es-ES", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+            ) : (
+              <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>Usuarios registrados</h2>
+                {users.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <p>No hay usuarios registrados.</p>
+                  </div>
+                ) : (
+                  <table className={styles.table}>
+                    <thead className={styles.tableHeader}>
+                      <tr>
+                        <th className={styles.tableHeaderCell}>Nombre</th>
+                        <th className={styles.tableHeaderCell}>Email</th>
+                        <th className={styles.tableHeaderCell}>Rol</th>
+                        <th className={styles.tableHeaderCell}>Estado</th>
+                        <th className={styles.tableHeaderCell}>Fecha Registro</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u) => (
+                        <tr key={u._id} className={styles.tableRow}>
+                          <td className={styles.tableCell}>{u.name}</td>
+                          <td className={styles.tableCell}>{u.email}</td>
+                          <td className={styles.tableCell}>
+                            <span
+                              className={styles.badge}
+                              style={{
+                                background:
+                                  u.role === "admin" ? "#dbeafe" : "#f3e8ff",
+                                color: u.role === "admin" ? "#1e40af" : "#6b21a8",
+                              }}
+                            >
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className={styles.tableCell}>
+                            <span
+                              className={`${styles.badge} ${
+                                u.isActive ? styles.badgeActive : styles.badgeInactive
+                              }`}
+                            >
+                              {u.isActive ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
+                          <td className={styles.tableCell}>
+                            <span className={styles.dateText}>
+                              {new Date(u.createdAt).toLocaleString("es-ES", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+            )}
+          </>
+        )}
+      </main>
+    </div>
   );
 }

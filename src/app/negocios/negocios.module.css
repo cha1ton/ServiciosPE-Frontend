@@ -11,6 +11,67 @@
   padding: 24px;
 }
 
+/* ============================================
+   SECCIÓN HERO - TÍTULO PRINCIPAL
+   ============================================ */
+
+.heroSection {
+  text-align: center;
+  margin-bottom: 32px;
+  margin-top: 40px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.heroHighlight {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.heroSubtitle {
+  font-size: 1.125rem;
+  color: #666;
+  font-weight: 400;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
 /* ===== LOCATION BANNER ===== */
 .locationBanner {
   background: white;
@@ -310,6 +371,14 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -329,6 +398,21 @@
   .locationContent,
   .locationError {
     font-size: 0.9rem;
+  }
+
+  /* Hero responsive */
+  .heroSection {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.9375rem;
+    padding: 0 12px;
   }
 
   /* Badge de ubicación en móvil */
@@ -363,4 +447,46 @@
   .resultsSection {
     margin-top: 20px;
   }
+
+  /* Hero mobile */
+  .heroSection {
+    margin-top: 16px;
+    margin-bottom: 20px;
+  }
+
+  .heroTitle {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+
+  .heroSubtitle {
+    font-size: 0.875rem;
+  }
+}
+
+/* Agregar estos estilos a tu archivo home.module.css o negocios.module.css */
+
+.categoryCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: all 0.3s ease;
+}
+
+.categoryChip.active .categoryCount {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.categoryChip:hover .categoryCount {
+  background: rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
 }

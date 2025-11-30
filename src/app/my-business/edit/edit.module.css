@@ -1,4 +1,4 @@
-/* ===== PAGE CONTAINER ===== */
+/*PAGE CONTAINER*/
 .page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -10,7 +10,7 @@
   padding: 40px 24px;
 }
 
-/* ===== HEADER ===== */
+/*HEADER*/
 .header {
   text-align: center;
   margin-bottom: 40px;
@@ -33,7 +33,7 @@
   margin: 0;
 }
 
-/* ===== ALERTS ===== */
+/*ALERTS*/
 .successMessage {
   padding: 16px 20px;
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
@@ -101,7 +101,7 @@
   }
 }
 
-/* ===== FORM CONTAINER ===== */
+/*FORM CONTAINER*/
 .form {
   background: white;
   border-radius: 20px;
@@ -109,7 +109,7 @@
   padding: 40px;
 }
 
-/* ===== SECTIONS ===== */
+/*SECTIONS*/
 .section {
   margin-bottom: 40px;
 }
@@ -138,7 +138,7 @@
   font-size: 1.2rem;
 }
 
-/* ===== FORM GROUPS ===== */
+/*FORM GROUPS*/
 .formGroup {
   margin-bottom: 24px;
 }
@@ -195,14 +195,14 @@
   display: block;
 }
 
-/* ===== ADDRESS GRID ===== */
+/* ADDRESS GRID*/
 .addressGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
-/* ===== MAP CONTAINER ===== */
+/*  MAP CONTAINER */
 .mapContainer {
   margin-top: 12px;
   border: 2px solid #e0e0e0;
@@ -229,7 +229,7 @@
   border: 1px solid #ffc107;
 }
 
-/* ===== FILE INPUT ===== */
+/*FILE INPUT*/
 .fileInput {
   display: block;
   width: 100%;
@@ -246,7 +246,7 @@
   background: #f0f7ff;
 }
 
-/* ===== SCHEDULE ===== */
+/*SCHEDULE*/
 .scheduleGrid {
   display: grid;
   gap: 16px;
@@ -292,7 +292,7 @@
   font-weight: 600;
 }
 
-/* ===== SUBMIT BUTTON ===== */
+/*SUBMIT BUTTON*/
 .submitButton {
   width: 100%;
   padding: 16px 32px;
@@ -323,7 +323,7 @@
   box-shadow: none;
 }
 
-/* ===== LOADING STATE ===== */
+/*LOADING STATE*/
 .loading {
   display: flex;
   flex-direction: column;

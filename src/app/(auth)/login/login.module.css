@@ -1,4 +1,4 @@
-/* ===== FONDO EN TODA LA PANTALLA ===== */
+/*FONDO EN TODA LA PANTALLA */
 .page {
   min-height: 100svh;
   background: url("https://t3.ftcdn.net/jpg/04/49/73/64/360_F_449736488_IAGo58o7DloC8Os5S5v9vppX3BIxzK4S.jpg") center/cover no-repeat fixed;
@@ -17,7 +17,7 @@
   justify-content: center;
 }
 
-/* ===== CARD HORIZONTAL ===== */
+/*CARD HORIZONTAL */
 .card {
   background: #ffffff;
   border-radius: 20px;
@@ -31,7 +31,7 @@
   align-items: center;
 }
 
-/* ===== SECCIÓN IZQUIERDA ===== */
+/*SECCIÓN IZQUIERDA*/
 .leftSection {
   display: flex;
   flex-direction: column;
@@ -88,7 +88,7 @@
   font-weight: 500;
 }
 
-/* ===== SECCIÓN DERECHA ===== */
+/*SECCIÓN DERECHA*/
 .rightSection {
   display: flex;
   flex-direction: column;
@@ -124,7 +124,7 @@
   text-align: left;
 }
 
-/* ===== BOTÓN GOOGLE ===== */
+/*BOTÓN GOOGLE*/
 .googleBtn {
   width: 100%;
   padding: 14px 24px;
@@ -158,7 +158,7 @@
   cursor: not-allowed;
 }
 
-/* ===== LEGALES ===== */
+/*LEGALES*/
 .terms {
   text-align: center;
   margin-top: 0;
@@ -176,7 +176,7 @@
   text-decoration: underline;
 }
 
-/* ===== LOADING SCREEN ===== */
+/*OADING SCREEN*/
 .loadingScreen {
   min-height: 100vh;
   display: flex;
@@ -185,7 +185,7 @@
   background: #f8f9fa;
 }
 
-/* ===== RESPONSIVE ===== */
+/*RESPONSIVE*/
 @media (max-width: 768px) {
   .page {
     padding: 10px;
@@ -209,7 +209,7 @@
     margin-bottom: 0;
   }
 
-  /* OCULTAR ICONOS EN MÓVIL */
+  /*OCULTAR ICONOS EN MÓVIL*/
   .serviceIcons {
     display: none;
   }

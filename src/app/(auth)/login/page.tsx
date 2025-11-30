@@ -91,11 +91,11 @@ export default function LoginPage() {
             </button>
 
             <div className={styles.terms}>
-              Al continuar aceptas los{" "}
+              Al continuar aceptas las{" "}
               <Link href="/terms" className={styles.link}>
-                Términos
+                
               </Link>{" "}
-              y la{" "}
+              {" "}
               <Link href="/privacy" className={styles.link}>
                 Política de Privacidad
               </Link>

@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Header */}
+        {}
         <div className={styles.header}>
           <div className={styles.iconBadge}>
             <Users size={32} strokeWidth={2} />
@@ -24,7 +24,7 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* Content */}
+        {}
         <div className={styles.content}>
           <div className={styles.section}>
             <p className={styles.lead}>
