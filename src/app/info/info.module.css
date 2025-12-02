@@ -1,4 +1,4 @@
-/* ===== PÁGINA BASE ===== */
+/*PÁGINA BASE*/
 .page {
   min-height: 100vh;
   background: #f8f9fa;
@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-/* ===== HEADER ===== */
+/*HEADER*/
 .header {
   background: white;
   padding: 50px 40px 40px;
@@ -49,7 +49,7 @@
   line-height: 1.6;
 }
 
-/* ===== CONTENIDO ===== */
+/*CONTENIDO*/
 .content {
   padding: 40px;
 }
@@ -92,7 +92,7 @@
   color: #555;
 }
 
-/* ===== LISTAS ===== */
+/* LISTAS*/
 .list {
   list-style: none;
   padding: 0;
@@ -129,7 +129,7 @@
   font-size: 14px;
 }
 
-/* ===== TARJETAS DE CONTACTO ===== */
+/*TARJETAS DE CONTACTO*/
 .contactGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -190,7 +190,7 @@
   line-height: 1.5;
 }
 
-/* ===== PASOS (CÓMO FUNCIONA) ===== */
+/*PASOS (CÓMO FUNCIONA)*/
 .stepsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -255,7 +255,7 @@
   line-height: 1.6;
 }
 
-/* ===== BOTONES ===== */
+/*BOTONES*/
 .buttonGroup {
   display: flex;
   gap: 16px;
@@ -302,7 +302,7 @@
   transform: translateY(-2px);
 }
 
-/* ===== CTA BOX ===== */
+/*CTA BOX*/
 .ctaBox {
   background: #f8fafb;
   border-left: 4px solid #4285f4;
@@ -329,7 +329,7 @@
   text-decoration: underline;
 }
 
-/* ===== BACK LINK ===== */
+/*BACK LINK*/
 .backLink {
   display: inline-flex;
   align-items: center;
@@ -349,7 +349,7 @@
   gap: 12px;
 }
 
-/* ===== RESPONSIVE ===== */
+/*RESPONSIVE*/
 @media (max-width: 768px) {
   .page {
     padding: 60px 10px 30px;

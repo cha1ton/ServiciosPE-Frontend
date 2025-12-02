@@ -589,3 +589,30 @@
     padding: 9px 10px;
   }
 }
+
+/* Agregar estos estilos a tu home.module.css existente */
+
+.categoryCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: all 0.3s ease;
+}
+
+.categoryChip.active .categoryCount {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.categoryChip:hover .categoryCount {
+  background: rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}

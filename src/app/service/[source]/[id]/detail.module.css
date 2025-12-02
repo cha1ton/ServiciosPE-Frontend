@@ -1,8 +1,8 @@
 /* frontend/src/app/service/[source]/[id]/detail.module.css */
 
-/* ================================
+/* 
    LAYOUT PRINCIPAL
-   ================================ */
+    */
 .page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
@@ -15,9 +15,9 @@
   padding-top: 100px;
 }
 
-/* ================================
+/* 
    ESTADOS DE CARGA Y ERROR
-   ================================ */
+    */
 .loading {
   display: flex;
   flex-direction: column;
@@ -80,9 +80,9 @@
   margin-bottom: 2rem;
 }
 
-/* ================================
+/* 
    HEADER DEL SERVICIO
-   ================================ */
+    */
 .header {
   background: white;
   border-radius: 16px;
@@ -263,60 +263,48 @@
   font-size: 1rem;
 }
 
-.ratingLink {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #10b981;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.9375rem;
-  transition: all 0.3s ease;
-  padding: 0.625rem 1.125rem;
-  border-radius: 50px;
-  background: #10b98110;
-  border: 2px solid transparent;
-  white-space: nowrap;
-  margin-left: auto;
-}
-
-.ratingLink:hover {
-  background: #10b981;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
-  border-color: #10b981;
-}
-
-/* ================================
-   CARRUSEL DE IMÁGENES
-   ================================ */
+/* 
+   CARRUSEL DE IMÁGENES - MEJORADO
+    */
 .carousel {
   position: relative;
   width: 100%;
-  height: 400px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 1.5rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  background: #000;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .carouselImage {
   width: 100%;
-  height: 100%;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carouselImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .carousel:hover .carouselImage img {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .carouselButton {
@@ -366,16 +354,18 @@
   gap: 0.75rem;
   z-index: 10;
   padding: 0.75rem 1.25rem;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 50px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e5e7eb;
 }
 
 .carouselIndicator {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: #d1d5db;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -383,7 +373,7 @@
 }
 
 .carouselIndicator:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: #9ca3af;
   transform: scale(1.2);
 }
 
@@ -395,11 +385,14 @@
 
 .galleryPlaceholder {
   width: 100%;
-  height: 300px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 300px;
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -409,15 +402,15 @@
   font-size: 1rem;
   font-weight: 600;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 2px dashed #d1d5db;
   position: relative;
+  padding: 1rem;
 }
 
 .galleryPlaceholder::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 70%);
 }
 
 .galleryPlaceholder > * {
@@ -426,17 +419,19 @@
 }
 
 .galleryPlaceholder img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* ================================
+/* 
    SECCIONES
-   ================================ */
+    */
 .section {
   background: white;
   border-radius: 16px;
@@ -482,13 +477,13 @@
   color: #4b5563;
 }
 
-/* ================================
+/* 
    INFORMACIÓN DE CONTACTO
-   ================================ */
+    */
 .infoGrid {
   display: grid;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .infoItem {
@@ -547,6 +542,56 @@
   text-decoration: underline;
 }
 
+/* 
+   ENLACES DE GOOGLE MAPS - NUEVO
+    */
+.googleLinksSection {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f3f4f6;
+  flex-wrap: wrap;
+}
+
+.googleLink {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 2px solid #bae6fd;
+  border-radius: 12px;
+  color: #0284c7;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  min-width: 250px;
+  justify-content: center;
+}
+
+.googleLink:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border-color: #0284c7;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.4);
+}
+
+.googleLink.secondary {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-color: #bbf7d0;
+  color: #10b981;
+}
+
+.googleLink.secondary:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+  color: white;
+}
+
 .actions {
   display: flex;
   gap: 1rem;
@@ -591,9 +636,9 @@
   transform: translateY(-2px) scale(1.02);
 }
 
-/* ================================
+/* 
    HORARIO
-   ================================ */
+    */
 .scheduleGrid {
   display: grid;
   gap: 0.75rem;
@@ -632,9 +677,9 @@
   color: #ef4444;
 }
 
-/* ================================
+/* 
    RESEÑAS
-   ================================ */
+    */
 .reviewsSection {
   background: white;
   border-radius: 20px;
@@ -828,9 +873,9 @@
   font-weight: 500;
 }
 
-/* ================================
+/* 
    LISTA DE RESEÑAS
-   ================================ */
+    */
 .reviewsList {
   display: flex;
   flex-direction: column;
@@ -899,9 +944,9 @@
   margin-bottom: 1rem;
 }
 
-/* ================================
+/* 
    RESPUESTAS DEL DUEÑO
-   ================================ */
+    */
 .ownerReply {
   background: white;
   border-left: 4px solid #10b981;
@@ -959,9 +1004,9 @@
   box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
 }
 
-/* ================================
+/* 
    RESPONSIVE
-   ================================ */
+    */
 @media (max-width: 768px) {
   .main {
     padding: 1rem;
@@ -1003,16 +1048,13 @@
     font-size: 1.25rem;
   }
 
-  .ratingLink {
-    width: 100%;
-    justify-content: center;
-    margin-left: 0;
-    font-size: 0.875rem;
+  .carousel {
+    padding: 0.875rem;
+    border-radius: 12px;
   }
 
-  .carousel {
-    height: 250px;
-    border-radius: 12px;
+  .carouselImage img {
+    max-height: 450px;
   }
 
   .carouselButton {
@@ -1029,8 +1071,23 @@
   }
 
   .galleryPlaceholder {
-    height: 250px;
+    min-height: 250px;
+    padding: 0.875rem;
     border-radius: 12px;
+  }
+
+  .galleryPlaceholder img {
+    max-height: 400px;
+  }
+
+  .googleLinksSection {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .googleLink {
+    min-width: auto;
+    font-size: 0.875rem;
   }
 
   .section {
@@ -1147,8 +1204,13 @@
   }
 
   .carousel {
-    height: 200px;
+    padding: 0.75rem;
     border-radius: 10px;
+  }
+
+  .carouselImage img {
+    max-height: 350px;
+    border-radius: 6px;
   }
 
   .carouselButton {
@@ -1180,8 +1242,23 @@
   }
 
   .galleryPlaceholder {
-    height: 200px;
+    min-height: 200px;
+    padding: 0.75rem;
     font-size: 0.8125rem;
+  }
+
+  .galleryPlaceholder img {
+    max-height: 300px;
+    border-radius: 6px;
+  }
+
+  .googleLinksSection {
+    gap: 0.5rem;
+  }
+
+  .googleLink {
+    font-size: 0.8125rem;
+    padding: 0.875rem 1.25rem;
   }
 
   .section {

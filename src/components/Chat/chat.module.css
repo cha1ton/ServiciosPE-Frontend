@@ -1,4 +1,4 @@
-/* ===== WIDGET INTEGRADO ===== */
+/*  WIDGET INTEGRADO  */
 .chatWidget {
   border: 1px solid #e0e0e0;
   border-radius: 12px;
@@ -8,7 +8,7 @@
   overflow: hidden;
 }
 
-/* ===== HEADER ===== */
+/*  HEADER  */
 .header {
   display: flex;
   align-items: center;
@@ -81,7 +81,7 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* ===== BANNER DE LOGIN ===== */
+/*  BANNER DE LOGIN  */
 .loginBanner {
   background: #fff7e6;
   border-bottom: 1px solid #ffe0b2;
@@ -114,7 +114,7 @@
   background: #ffe082;
 }
 
-/* ===== LISTA DE MENSAJES ===== */
+/*  LISTA DE MENSAJES  */
 .messagesList {
   height: 240px;
   overflow-y: auto;
@@ -192,7 +192,7 @@
   text-decoration: underline;
 }
 
-/* ===== LOADING ANIMATION ===== */
+/*  LOADING ANIMATION  */
 .loadingBubble {
   display: flex;
   gap: 6px;
@@ -224,7 +224,7 @@
   }
 }
 
-/* ===== ADS ===== */
+/*  ADS  */
 .adContainer {
   margin: 12px 0;
   padding: 12px;
@@ -233,7 +233,7 @@
   border-radius: 8px;
 }
 
-/* ===== INPUT ===== */
+/*  INPUT  */
 .inputContainer {
   display: flex;
   gap: 8px;
@@ -290,7 +290,7 @@
   cursor: not-allowed;
 }
 
-/* ===== RESPONSIVE ===== */
+/*  RESPONSIVE  */
 @media (max-width: 768px) {
   .headerStatus {
     font-size: 0.7rem;

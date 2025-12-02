@@ -25,6 +25,7 @@ import {
   ImageOff,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
 } from "lucide-react";
 import styles from "./detail.module.css";
 
@@ -82,13 +83,13 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (!coordinates) getCurrentLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   const canFavorite = useMemo(() => item?.source === "serviciospe", [item?.source]);
   const canComment = canFavorite;
 
-  // Cargar desde cache
+ 
   useEffect(() => {
     const source = params.source;
     const id = params.id;
@@ -127,7 +128,7 @@ export default function ServiceDetailPage() {
       if (!hit) await fetchFallback();
       setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [params.source, params.id]);
 
   // Cargar favoritos
@@ -138,7 +139,7 @@ export default function ServiceDetailPage() {
         const { favorites } = await FavoritesService.listMine();
         setIsFavorite(favorites.includes(item.id));
       } catch {
-        /* ignore */
+        
       }
     })();
   }, [item, isAuthenticated]);
@@ -185,7 +186,7 @@ export default function ServiceDetailPage() {
             );
           }
         } catch {
-          /* ignore */
+          
         }
       })();
     }
@@ -367,29 +368,6 @@ export default function ServiceDetailPage() {
               {item.rating?.average?.toFixed(1) ?? "0.0"}
             </div>
             <span className={styles.ratingCount}>({item.rating?.count ?? 0} reseñas)</span>
-            
-            {item.source === "google" && (
-              <div className={styles.googleLinks}>
-                <a
-                  href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.ratingLink}
-                >
-                  <MessageCircle size={16} />
-                  Ver reseñas en Google
-                </a>
-                <a
-                  href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${styles.ratingLink} ${styles.secondary}`}
-                >
-                  <MapPin size={16} />
-                  Abrir en Google Maps
-                </a>
-              </div>
-            )}
           </div>
         </div>
 
@@ -516,6 +494,32 @@ export default function ServiceDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Enlaces de Google Maps - Movidos aquí */}
+          {item.source === "google" && (
+            <div className={styles.googleLinksSection}>
+              <a
+                href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.googleLink}
+              >
+                <MessageCircle size={18} />
+                Ver reseñas en Google
+                <ExternalLink size={16} />
+              </a>
+              <a
+                href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.googleLink} ${styles.secondary}`}
+              >
+                <MapPin size={18} />
+                Abrir en Google Maps
+                <ExternalLink size={16} />
+              </a>
+            </div>
+          )}
 
           <div className={styles.actions}>
             {hasOrigin && hasDest ? (

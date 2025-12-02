@@ -20,7 +20,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-// Cargar datos del usuario cuando esté disponible
+
 useEffect(() => {
   if (user) {
     setFormData({
@@ -28,9 +28,9 @@ useEffect(() => {
       customPhoto: user.customPhoto || ''
     });
     
-    // CORREGIR: Manejar tanto base64 como URLs normales
+    
     if (user.customPhoto) {
-      // Si es base64 (no empieza con http), agregar prefijo
+      
       if (!user.customPhoto.startsWith('http')) {
         setPreviewImage(`data:image/jpeg;base64,${user.customPhoto}`);
       } else {
@@ -44,7 +44,7 @@ useEffect(() => {
   }
 }, [user]);
 
-  // Redirigir si no está autenticado
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
@@ -52,7 +52,7 @@ useEffect(() => {
   }, [authLoading, user, router]);
 
 
-  // ✅ AGREGAR ESTO PARA DEBUG
+  
   useEffect(() => {
     if (user) {
       console.log('🔍 DEBUG Profile - Rol del usuario:', user.role);
@@ -64,22 +64,22 @@ useEffect(() => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tipo de archivo
+      
       if (!file.type.startsWith("image/")) {
         setMessage("Por favor selecciona una imagen válida");
         return;
       }
 
-      // Ahora validamos con 1MB (igual que el backend)
+     
       if (file.size > 1 * 1024 * 1024) {
         setMessage("La imagen debe ser menor a 1MB");
         return;
       }
 
-      // Guardar el File object para enviarlo
+      
       setSelectedFile(file);
 
-      // Crear preview
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewImage(e.target?.result as string);
@@ -100,7 +100,7 @@ useEffect(() => {
         nickname: formData.nickname,
       };
 
-      // Si hay una nueva imagen (es un File object), agregarla
+     
       if (selectedFile) {
         profileData.profilePhoto = selectedFile;
       }
@@ -108,10 +108,10 @@ useEffect(() => {
       await AuthService.updateProfile(profileData);
       setMessage("Perfil actualizado correctamente");
 
-      // Refrescar datos del usuario
+      
       await refreshUser();
-      // Limpiar el archivo seleccionado después de guardar
-      setSelectedFile(null); //agregado el 27-09-25 02:59
+      
+      setSelectedFile(null); 
     } catch (error: any) {
       setMessage(error.message || "Error al actualizar el perfil");
     } finally {
@@ -150,7 +150,7 @@ useEffect(() => {
           )}
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            {/* Información de Google (no editable) */}
+            
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>Información de Google</h2>
 
@@ -177,11 +177,11 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Información editable directamente */}
+            
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>Información Pública</h2>
 
-              {/* Foto de perfil - SIEMPRE EDITABLE */}
+              {/* Foto de perfil */}
               <div className={styles.photoSection}>
                 <label className={styles.label}>Foto de Perfil</label>
                 <div className={styles.photoContainer}>
@@ -207,7 +207,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Apodo - SIEMPRE EDITABLE */}
+              {/* Apodo */}
               <div className={styles.field}>
                 <label className={styles.label}>
                   Apodo (Visible públicamente)

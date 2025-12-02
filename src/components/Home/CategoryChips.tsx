@@ -57,14 +57,17 @@ const CATEGORIES: { key: CategoryKey; label: string; icon: React.ReactNode }[] =
 interface Props {
   selected: CategoryKey | "";
   onSelect: (k: CategoryKey) => void;
+  counts?: Record<CategoryKey, number>;
   style?: React.CSSProperties;
 }
 
-export default function CategoryChips({ selected, onSelect, style }: Props) {
+export default function CategoryChips({ selected, onSelect, counts, style }: Props) {
   return (
     <div className={styles.categoryChips} style={style}>
       {CATEGORIES.map((c) => {
         const active = c.key === selected;
+        const count = counts?.[c.key] ?? 0;
+        
         return (
           <button
             key={c.key}
@@ -73,6 +76,9 @@ export default function CategoryChips({ selected, onSelect, style }: Props) {
           >
             <span className={styles.categoryIcon}>{c.icon}</span>
             <span className={styles.categoryLabel}>{c.label}</span>
+            {count > 0 && (
+              <span className={styles.categoryCount}>{count}</span>
+            )}
           </button>
         );
       })}

@@ -220,7 +220,7 @@ export default function RegisterBusinessPage() {
         {error && <div className={styles.errorMessage}>{error}</div>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Información Básica */}
+          
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><Building2 size={20} /></span>

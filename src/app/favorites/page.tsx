@@ -32,12 +32,12 @@ export default function FavoritesPage() {
     }
   }, [loading, isAuthenticated, router]);
 
-  // Obtener ubicación
+  
   useEffect(() => {
     if (!coordinates && !geoLoading) getCurrentLocation();
   }, []);
 
-  // Cargar IDs favoritos
+  
   useEffect(() => {
     if (!isAuthenticated) return;
     (async () => {
@@ -54,7 +54,7 @@ export default function FavoritesPage() {
     })();
   }, [isAuthenticated]);
 
-  // Obtener detalles de cada servicio
+  
   useEffect(() => {
     if (!ids.length) { setItems([]); return; }
     (async () => {

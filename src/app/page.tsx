@@ -35,7 +35,7 @@ export default function LandingPage() {
       <Navbar />
       
       <main className={styles.landingMain}>
-        {/* ===== HERO SECTION ===== */}
+        {/*  HERO SECTION  */}
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
             {/* Texto Hero */}
@@ -111,7 +111,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ===== FEATURES SECTION ===== */}
+        {/*  FEATURES SECTION  */}
         <section className={styles.featuresSection}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>¿Por qué elegir ServiciosPE?</h2>
@@ -189,7 +189,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ===== CATEGORIES SECTION ===== */}
+        {/*  CATEGORIES SECTION  */}
         <section className={styles.categoriesSection}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Explora por categoría</h2>
@@ -249,7 +249,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ===== CTA FINAL SECTION ===== */}
+        {/*  CTA FINAL SECTION  */}
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
             <h2 className={styles.ctaTitle}>
