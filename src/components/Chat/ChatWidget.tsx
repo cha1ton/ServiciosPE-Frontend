@@ -109,50 +109,74 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     return hasPorque && (hasKeywords || hasVerb);
   }
 
-  // 🆕 Explicación basada en el último set de resultados
-  function buildWhyExplanation(state: LastResultsState): string {
-    if (!state.items.length) {
-      return "Te estoy mostrando lugares ordenados por cercanía y, cuando es posible, por mejor calificación.";
-    }
+  // 🆕 helper interno para no repetir lógica
+function hasRealRating(item?: SearchItem) {
+  if (!item || !item.rating) return false;
+  const avg = typeof item.rating.average === "number" ? item.rating.average : 0;
+  const count = typeof item.rating.count === "number" ? item.rating.count : 0;
+  return count > 0 && avg > 0;
+}
 
-    // Ordenar por distancia ascendente, y si empatan, por rating descendente
-    const sorted = [...state.items].sort((a, b) => {
-      const da = a.distanceMeters ?? Infinity;
-      const db = b.distanceMeters ?? Infinity;
-      if (da !== db) return da - db;
-      const ra = a.rating?.average ?? 0;
-      const rb = b.rating?.average ?? 0;
-      return rb - ra;
-    });
+function formatRatingText(item: SearchItem) {
+  if (!item.rating) return "";
+  const avg = typeof item.rating.average === "number" ? item.rating.average : 0;
+  const count = typeof item.rating.count === "number" ? item.rating.count : 0;
+  if (count <= 0 || avg <= 0) return "";
+  return `${avg.toFixed(1)}★ (${count} reseñas)`;
+}
 
-    const first = sorted[0];
-    const dist = `${Math.round(first.distanceMeters ?? 0)} m`;
-    const hasRating = !!first.rating && typeof first.rating.average === "number";
-    const ratingText = hasRating
-      ? `${first.rating.average.toFixed(1)}★ (${first.rating.count ?? 0} reseñas)`
-      : "aún sin reseñas de usuarios";
-
-    if (state.mode === "single") {
-      return `Te recomiendo ese lugar porque está relativamente cerca de ti (${dist}) y ${
-        hasRating ? `tiene una calificación de ${ratingText}` : "puede ayudarte con lo que estás buscando"
-      }.`;
-    }
-
-    // TOP N
-    if (sorted.length >= 2) {
-      const second = sorted[1];
-      const dist2 = `${Math.round(second.distanceMeters ?? 0)} m`;
-      const rating2 = second.rating && typeof second.rating.average === "number"
-        ? `${second.rating.average.toFixed(1)}★`
-        : null;
-
-      return `Te recomendé esos lugares porque son de los más cercanos a tu ubicación y están ordenados por distancia y calificación. Por ejemplo, ${first.name} está a ${dist} y ${
-        hasRating ? `tiene ${ratingText}` : "puede ayudarte con lo que pediste"
-      }${rating2 ? `, y ${second.name} está a ${dist2} con ${rating2}` : ""}.`;
-    }
-
-    return `Te recomendé ese lugar porque está cerca de ti (${dist}) y se ajusta a lo que pediste.`;
+// 🆕 Explicación basada en el último set de resultados
+function buildWhyExplanation(state: LastResultsState): string {
+  if (!state.items.length) {
+    return "Te estoy mostrando lugares ordenados por cercanía y, cuando es posible, por mejor calificación.";
   }
+
+  // Ordenar por distancia ascendente, y si empatan, por rating descendente
+  const sorted = [...state.items].sort((a, b) => {
+    const da = a.distanceMeters ?? Infinity;
+    const db = b.distanceMeters ?? Infinity;
+    if (da !== db) return da - db;
+    const ra = a.rating?.average ?? 0;
+    const rb = b.rating?.average ?? 0;
+    return rb - ra;
+  });
+
+  const first = sorted[0];
+  const dist = `${Math.round(first.distanceMeters ?? 0)} m`;
+  const firstHasRating = hasRealRating(first);
+  const firstRatingText = formatRatingText(first);
+
+  if (state.mode === "single") {
+    if (firstHasRating) {
+      return `Te recomiendo ese lugar porque está relativamente cerca de ti (${dist}) y tiene una calificación de ${firstRatingText}.`;
+    }
+    return `Te recomiendo ese lugar porque está relativamente cerca de ti (${dist}) y puede ayudarte con lo que estás buscando.`;
+  }
+
+  // TOP N
+  if (sorted.length >= 2) {
+    const second = sorted[1];
+    const dist2 = `${Math.round(second.distanceMeters ?? 0)} m`;
+    const secondHasRating = hasRealRating(second);
+    const secondRatingText = formatRatingText(second);
+
+    let base = "Te recomendé esos lugares porque son de los más cercanos a tu ubicación y están ordenados por distancia y, cuando hay reseñas, por calificación. ";
+
+    base += `${first.name} está a ${dist}`;
+    if (firstHasRating) {
+      base += ` y tiene ${firstRatingText}`;
+    }
+
+    if (secondHasRating) {
+      base += `, y ${second.name} está a ${dist2} con ${secondRatingText}`;
+    }
+
+    return base + ".";
+  }
+
+  return `Te recomendé ese lugar porque está cerca de ti (${dist}) y se ajusta a lo que pediste.`;
+}
+
 
   async function sendText() {
     const text = input.trim();
@@ -212,8 +236,27 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
             limit: 5
           });
 
-          if (res.results?.length) {
-            const resultKey = res.results.map(r => `${r.source}:${r.id}`).join('|');
+          const results = Array.isArray(res.results) ? [...res.results] : [];
+
+          // ✅ Ordenar por distancia (asc) y, si empatan, por mejor rating
+          results.sort((a: SearchItem, b: SearchItem) => {
+            const da = typeof a.distanceMeters === 'number' ? a.distanceMeters : Number.POSITIVE_INFINITY;
+            const db = typeof b.distanceMeters === 'number' ? b.distanceMeters : Number.POSITIVE_INFINITY;
+
+            if (da !== db) return da - db;
+
+            const ra = a.rating?.average ?? 0;
+            const rb = b.rating?.average ?? 0;
+            if (ra !== rb) return rb - ra; // mayor rating primero
+
+            const ca = a.rating?.count ?? 0;
+            const cb = b.rating?.count ?? 0;
+            return cb - ca; // más reseñas primero
+          });
+
+          if (results.length) {
+            const resultKey = results.map(r => `${r.source}:${r.id}`).join('|');
+
             if (recommendedRef.current.key !== resultKey) {
               recommendedRef.current = { key: resultKey, ids: new Set() };
             }
@@ -248,15 +291,15 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
             if (requestedIndex != null) want = 1;
 
             const picks: SearchItem[] = [];
-            if (requestedIndex != null && requestedIndex >= 0 && requestedIndex < res.results.length) {
+            if (requestedIndex != null && requestedIndex >= 0 && requestedIndex < results.length) {
               picks.push(res.results[requestedIndex]);
             }
-            for (const r of res.results) {
+            for (const r of results) {
               if (picks.length >= want) break;
               const key = `${r.source}:${r.id}`;
               if (!recommendedRef.current.ids.has(key)) picks.push(r);
             }
-            for (const r of res.results) {
+            for (const r of results) {
               if (picks.length >= want) break;
               if (!picks.find(p => p.id === r.id && p.source === r.source)) picks.push(r);
             }
@@ -345,6 +388,86 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
       .replace(/_(.*?)_/g, '$1');
   }
 
+  function buildExplanation(picks: SearchItem[], want: number) {
+    if (!picks.length) return '';
+
+    // helper para clave única
+    const keyOf = (p: SearchItem) => `${p.source}:${p.id}`;
+
+    const first = picks[0];
+
+    const closest = picks.reduce((best, cur) => {
+      const bd = typeof best.distanceMeters === 'number' ? best.distanceMeters : Number.POSITIVE_INFINITY;
+      const cd = typeof cur.distanceMeters === 'number' ? cur.distanceMeters : Number.POSITIVE_INFINITY;
+      return cd < bd ? cur : best;
+    }, picks[0]);
+
+    const bestRated = picks.reduce((best, cur) => {
+      const br = best.rating?.average ?? 0;
+      const cr = cur.rating?.average ?? 0;
+      if (cr > br) return cur;
+      if (cr < br) return best;
+
+      const bc = best.rating?.count ?? 0;
+      const cc = cur.rating?.count ?? 0;
+      return cc > bc ? cur : best;
+    }, picks[0]);
+
+    const hasRating = (p: SearchItem) =>
+      p.rating && typeof p.rating.average === 'number' && (p.rating.count ?? 0) > 0;
+
+    // Caso 1: solo 1 recomendación
+    if (want === 1 || picks.length === 1) {
+      const dist = typeof first.distanceMeters === 'number'
+        ? `${Math.round(first.distanceMeters)} m`
+        : null;
+
+      let msg = 'Te recomiendo este lugar';
+      if (dist) msg += ` porque está cerca de ti (${dist})`;
+      if (hasRating(first)) {
+        const avg = first.rating!.average.toFixed(1);
+        const cnt = first.rating!.count;
+        msg += dist ? ' y' : ' porque';
+        msg += ` tiene una buena calificación (${avg}★${cnt ? `, ${cnt} reseñas` : ''})`;
+      }
+      return msg + '.';
+    }
+
+    // Caso 2: TOP N
+    const closestDist = typeof closest.distanceMeters === 'number'
+      ? `${Math.round(closest.distanceMeters)} m`
+      : null;
+
+    const samePlace = keyOf(closest) === keyOf(bestRated);
+    const hasBestRating = hasRating(bestRated);
+
+    if (samePlace && hasBestRating) {
+      // el primero es el más cercano y mejor puntuado
+      let msg = 'Te muestro estas opciones porque están ordenadas por cercanía y calificación. ';
+      msg += `${closest.name} es el más cercano`;
+      if (closestDist) msg += ` (${closestDist})`;
+      msg += ' y además tiene buena calificación.';
+      return msg;
+    }
+
+    let msg = 'Te muestro estas opciones porque combinan cercanía y calificación. ';
+    if (closestDist) {
+      msg += `${closest.name} es el más cercano (${closestDist})`;
+    } else {
+      msg += `${closest.name} está muy cerca de ti`;
+    }
+
+    if (hasBestRating && keyOf(bestRated) !== keyOf(closest)) {
+      const avg = bestRated.rating!.average.toFixed(1);
+      const cnt = bestRated.rating!.count;
+      msg += `, mientras que ${bestRated.name} destaca por su calificación (${avg}★${cnt ? `, ${cnt} reseñas` : ''}).`;
+    } else {
+      msg += '.';
+    }
+
+    return msg;
+  }
+
   const assistantCount = useMemo(
     () => messages.filter(m => m.role === 'assistant').length,
     [messages]
@@ -366,10 +489,22 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
 
   function formatLine(p: SearchItem, i: number, origin: { lat: number; lng: number }) {
     const dir = formatMapLink(origin, p.coordinates);
-    const dist = `${Math.round(p.distanceMeters)} m`;
-    const rating = p.rating?.count ? ` • ★ ${p.rating.average.toFixed(1)} (${p.rating.count})` : '';
+    const dist = typeof p.distanceMeters === 'number'
+      ? `${Math.round(p.distanceMeters)} m`
+      : '';
+
+    const hasRating = p.rating && typeof p.rating.average === 'number' && (p.rating.count ?? 0) > 0;
+    const ratingPart = hasRating
+      ? ` • ⭐ ${p.rating!.average.toFixed(1)} (${p.rating!.count} reseñas)`
+      : '';
+
     const addr = p.address?.formatted || '';
-    return `${i + 1}. ${p.name}\n${addr}\n${dist}${rating}\n\n[Como llegar →](${dir})`;
+
+    return `${i + 1}. ${p.name}
+  📌 ${addr}
+  📏 ${dist}${ratingPart}
+
+  [Como llegar →](${dir})`;
   }
 
   function assembleChatSummary(
@@ -378,41 +513,14 @@ export default function ChatWidget({ coords, defaultDistance, initialCategory = 
     coords: { lat: number; lng: number },
     want: number
   ) {
-    // 🆕 Ordenamos por distancia (y rating como desempate)
-    const sorted = [...picks].sort((a, b) => {
-      const da = a.distanceMeters ?? Infinity;
-      const db = b.distanceMeters ?? Infinity;
-      if (da !== db) return da - db;
-      const ra = a.rating?.average ?? 0;
-      const rb = b.rating?.average ?? 0;
-      return rb - ra;
-    });
+    const lines = picks.map((p, i) => formatLine(p, i, coords));
+    const header = buildHeader(res.results.length, picks.length, want);
+    const tail = getConditionalCTA(res.results.length, picks.length);
 
-    const header = buildHeader(res.results.length, sorted.length, want);
-    const tail = getConditionalCTA(res.results.length, sorted.length);
+    const explanation = buildExplanation(picks, want);
+    const explBlock = explanation ? `${explanation}\n\n` : '';
 
-    // Mensaje explicativo distinto según cantidad
-    let intro = "";
-    if (sorted.length === 1) {
-      const first = sorted[0];
-      const dist = `${Math.round(first.distanceMeters ?? 0)} m`;
-      const ratingPart = first.rating?.count
-        ? ` y tiene una calificación de ${first.rating.average.toFixed(1)}★ (${first.rating.count} reseñas)`
-        : "";
-      intro = `Te recomiendo este lugar porque está cerca de ti (${dist})${ratingPart}.`;
-    } else if (sorted.length > 1) {
-      const first = sorted[0];
-      const dist = `${Math.round(first.distanceMeters ?? 0)} m`;
-      const ratingPart = first.rating?.count
-        ? ` y tiene una calificación de ${first.rating.average.toFixed(1)}★ (${first.rating.count} reseñas)`
-        : "";
-      intro = `Te muestro estas opciones porque están cerca de ti y la primera destaca por su ubicación (${dist})${ratingPart}.`;
-    }
-
-    const lines = sorted.map((p, i) => formatLine(p, i, coords));
-    const introBlock = intro ? `${intro}\n\n` : "";
-
-    return `${header}:\n\n${introBlock}${lines.join('\n\n')}${tail}`;
+    return `${header}:\n\n${explBlock}${lines.join('\n\n')}${tail}`;
   }
 
   return (
