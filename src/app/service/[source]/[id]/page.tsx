@@ -488,7 +488,7 @@ const images = [
               </div>
             )}
 
-            {item.contact?.email && (
+            {/* {item.contact?.email && (
               <div className={styles.infoItem}>
                 <span className={styles.infoIcon}>
                   <Mail size={18} />
@@ -497,7 +497,7 @@ const images = [
                   <a href={`mailto:${item.contact.email}`}>{item.contact.email}</a>
                 </span>
               </div>
-            )}
+            )} */}
 
             {item.contact?.website && (
               <div className={styles.infoItem}>
