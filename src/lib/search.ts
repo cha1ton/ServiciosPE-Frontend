@@ -25,6 +25,7 @@ export interface SearchItem {
   contact?: { phone?: string; email?: string; website?: string };
   image?: string;      // data URL (tuyo) o URL de proxy (Google)
   createdAt?: string;
+  photoRefs?: string[];
 }
 
 export interface SearchResponse {

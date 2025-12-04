@@ -264,9 +264,9 @@ export default function ServiceDetailPage() {
     }
   };
 
-  // Funciones del carrusel
-  const images = (item as any)?.imagesUrl || [];
-  const hasMultipleImages = images.length > 1;
+
+
+ 
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -311,6 +311,29 @@ export default function ServiceDetailPage() {
       </div>
     );
   }
+
+  // Funciones del carrusel
+const googleImages =
+  item && item.source === "google"
+    ? (item.photoRefs || []).map((ref: string) =>
+        `${process.env.NEXT_PUBLIC_API_URL}/places/photo?ref=${encodeURIComponent(
+          ref
+        )}&maxwidth=800`
+      )
+    : [];
+
+const images = [
+  ...(((item as any)?.imagesUrl || []) as string[]),
+  ...googleImages,
+].filter(Boolean);
+
+console.log('[DETAIL] item.id', item.id);
+console.log('[DETAIL] source', item.source);
+console.log('[DETAIL] photoRefs', item.photoRefs);
+console.log('[DETAIL] googleImages', googleImages);
+console.log('[DETAIL] images', images);
+
+ const hasMultipleImages = images.length > 1;
 
   const hasOrigin =
     !!coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number";
