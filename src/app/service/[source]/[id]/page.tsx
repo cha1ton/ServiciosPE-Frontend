@@ -327,11 +327,6 @@ const images = [
   ...googleImages,
 ].filter(Boolean);
 
-console.log('[DETAIL] item.id', item.id);
-console.log('[DETAIL] source', item.source);
-console.log('[DETAIL] photoRefs', item.photoRefs);
-console.log('[DETAIL] googleImages', googleImages);
-console.log('[DETAIL] images', images);
 
  const hasMultipleImages = images.length > 1;
 
