@@ -166,7 +166,6 @@
   overflow: hidden;
 }
 
-/* Efecto de brillo sutil */
 .categoryChip::before {
   content: '';
   position: absolute;
@@ -254,7 +253,10 @@
   color: white;
 }
 
-/* ===== RESULT CARD (VERTICAL - MEJORADO) ===== */
+/* ===============================================
+   RESULT CARD - TODAS CON LA MISMA ALTURA
+   =============================================== */
+
 .resultCard {
   display: flex;
   flex-direction: column;
@@ -263,7 +265,6 @@
   background: white;
   overflow: hidden;
   transition: all 0.3s ease;
-  height: 100%;
 }
 
 .resultCard:hover {
@@ -299,6 +300,11 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
+.cardImagePlaceholder svg {
+  width: 48px;
+  height: 48px;
+}
+
 .cardImagePlaceholder span {
   font-size: 0.85rem;
   font-weight: 600;
@@ -311,6 +317,7 @@
   padding: 16px;
   flex: 1;
   min-height: 0;
+  justify-content: space-between;
 }
 
 .cardHeader {
@@ -329,16 +336,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2; /* Añadir esta línea */
+  line-clamp: 2;          /* versión estándar */
+  -webkit-line-clamp: 2;  /* versión con prefijo */
   -webkit-box-orient: vertical;
   height: 2.6em;
 }
+
 
 .cardBadges {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  min-height: 24px;
 }
 
 .badge {
@@ -379,8 +388,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+   line-clamp: 2;
   -webkit-line-clamp: 2;
-  line-clamp: 2; /* Añadir esta línea */
   -webkit-box-orient: vertical;
 }
 
@@ -420,8 +429,10 @@
 .cardActions {
   display: flex;
   gap: 8px;
-  margin-top: auto;
+  margin-top: 0;    /* o el valor que quieras */
+  /* elimina margin-top: auto */
 }
+
 
 .cardButton {
   flex: 1;
@@ -475,6 +486,12 @@
 }
 
 /* ===== RESPONSIVE MEJORADO ===== */
+@media (max-width: 1024px) {
+  .resultCard {
+    min-height: 500px;
+  }
+}
+
 @media (max-width: 768px) {
   .categoryChips {
     flex-wrap: nowrap;
@@ -509,68 +526,13 @@
     flex-shrink: 0;
     gap: 6px;
   }
-}
 
-@media (max-width: 480px) {
-  .categoryChips {
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 6px 0 10px 0;
-  }
-
-  .categoryChip {
-    font-size: 0.8rem;
-    padding: 8px 14px;
-    gap: 6px;
-    border-radius: 10px;
-  }
-
-
-  /* Categorías en scroll horizontal para móvil */
-  .categoryChips {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
-    scrollbar-width: thin;
-    scrollbar-color: #ccc transparent;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .categoryChips::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  .categoryChips::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .categoryChips::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-  }
-
-  .categoryChip {
-    font-size: 0.85rem;
-    padding: 8px 14px;
-    flex-shrink: 0;
+  .resultCard {
+    min-height: 480px;
   }
 
   .cardImage {
     height: 180px;
-  }
-
-  .cardTitle {
-    font-size: 1rem;
-  }
-
-  .cardActions {
-    flex-direction: column;
-  }
-
-  .cardButton {
-    width: 100%;
   }
 }
 
@@ -583,7 +545,6 @@
     font-size: 0.9rem;
   }
 
-  /* Categorías aún más compactas en móviles pequeños */
   .categoryChips {
     gap: 8px;
     margin-bottom: 12px;
@@ -595,7 +556,11 @@
   }
 
   .categoryIcon {
-    display: none; /* Ocultar iconos en móviles muy pequeños */
+    display: none;
+  }
+
+  .resultCard {
+    min-height: 460px;
   }
 
   .cardImage {
@@ -614,35 +579,13 @@
     font-size: 0.85rem;
   }
 
+  .cardActions {
+    flex-direction: column;
+  }
+
   .cardButton {
+    width: 100%;
     font-size: 0.8rem;
     padding: 9px 10px;
   }
-}
-
-/* Agregar estos estilos a tu home.module.css existente */
-
-.categoryCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 6px;
-  transition: all 0.3s ease;
-}
-
-.categoryChip.active .categoryCount {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.categoryChip:hover .categoryCount {
-  background: rgba(0, 0, 0, 0.15);
-  transform: scale(1.05);
 }

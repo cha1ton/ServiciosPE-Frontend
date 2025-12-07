@@ -140,7 +140,6 @@
    BADGE DE UBICACIÓN FLOTANTE
    ============================================ */
 
-/* Badge flotante en la esquina inferior izquierda */
 .locationBadge {
   position: fixed;
   bottom: 20px;
@@ -164,7 +163,6 @@
   white-space: nowrap;
 }
 
-/* Estado contraído (después de 5 segundos) */
 .locationBadge.collapsed {
   width: 40px;
   padding: 8px;
@@ -177,7 +175,6 @@
   transform: translateX(-10px);
 }
 
-/* Expansión al hover */
 .locationBadge:hover {
   width: auto;
   padding: 8px 16px;
@@ -192,7 +189,6 @@
   transform: translateX(0);
 }
 
-/* Texto del badge con transición */
 .locationBadgeText {
   transition: all 0.3s ease;
   display: inline-block;
@@ -253,7 +249,6 @@
   overflow: hidden;
 }
 
-/* Efecto de brillo que cruza el mensaje */
 .welcomeMessageContent::before {
   content: '';
   position: absolute;
@@ -306,10 +301,12 @@
   margin-top: 24px;
 }
 
+/* ===== GRID - SOLO ESTO IMPORTA PARA LAS CARDS ===== */
 .resultsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  align-items: stretch;
 }
 
 /* ===== LOADING ===== */
@@ -360,11 +357,6 @@
   font-weight: 500;
 }
 
-/* ===== AD CARD ===== */
-.adCard {
-  margin-top: 12px;
-}
-
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .resultsGrid {
@@ -400,7 +392,6 @@
     font-size: 0.9rem;
   }
 
-  /* Hero responsive */
   .heroSection {
     margin-top: 24px;
     margin-bottom: 24px;
@@ -415,7 +406,6 @@
     padding: 0 12px;
   }
 
-  /* Badge de ubicación en móvil */
   .locationBadge {
     bottom: 16px;
     left: 12px;
@@ -423,7 +413,6 @@
     padding: 6px 12px;
   }
 
-  /* Mensaje de bienvenida en móvil */
   .welcomeMessage {
     top: 70px;
     width: 90%;
@@ -448,7 +437,6 @@
     margin-top: 20px;
   }
 
-  /* Hero mobile */
   .heroSection {
     margin-top: 16px;
     margin-bottom: 20px;
@@ -462,31 +450,4 @@
   .heroSubtitle {
     font-size: 0.875rem;
   }
-}
-
-/* Agregar estos estilos a tu archivo home.module.css o negocios.module.css */
-
-.categoryCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 6px;
-  transition: all 0.3s ease;
-}
-
-.categoryChip.active .categoryCount {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.categoryChip:hover .categoryCount {
-  background: rgba(0, 0, 0, 0.15);
-  transform: scale(1.05);
 }
