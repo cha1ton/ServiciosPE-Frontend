@@ -116,7 +116,7 @@
 .categoryChips {
   display: flex;
   gap: 12px;
-  flex-wrap: nowrap; /* Cambiado de wrap a nowrap */
+  flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 8px 0 12px 0;
@@ -160,7 +160,7 @@
   color: #444;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  flex-shrink: 0; /* Importante: evita que se compriman */
+  flex-shrink: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
@@ -183,24 +183,30 @@
 }
 
 .categoryChip:hover {
-  border-color: #4285f4;
-  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-  color: #1976d2;
-  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.15);
+  border-color: var(--category-color);
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--category-color) 10%, white) 0%, 
+    #ffffff 100%);
+  color: var(--category-color);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--category-color) 25%, transparent);
   transform: translateY(-2px);
 }
 
 .categoryChip.active {
-  border-color: #4285f4;
-  background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%);
+  border-color: var(--category-color);
+  background: linear-gradient(135deg, 
+    var(--category-color) 0%, 
+    color-mix(in srgb, var(--category-color) 85%, black) 100%);
   color: white;
-  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--category-color) 40%, transparent);
   transform: translateY(-2px);
 }
 
 .categoryChip.active:hover {
-  background: linear-gradient(135deg, #357ae8 0%, #1565c0 100%);
-  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--category-color) 90%, black) 0%, 
+    color-mix(in srgb, var(--category-color) 75%, black) 100%);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--category-color) 50%, transparent);
 }
 
 .categoryIcon {
@@ -222,6 +228,30 @@
   white-space: nowrap;
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.categoryCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.categoryChip:hover .categoryCount {
+  background: color-mix(in srgb, var(--category-color) 20%, transparent);
+  color: var(--category-color);
+}
+
+.categoryChip.active .categoryCount {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
 }
 
 /* ===== RESULT CARD (VERTICAL - MEJORADO) ===== */

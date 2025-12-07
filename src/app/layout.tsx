@@ -11,6 +11,11 @@ const provider = process.env.NEXT_PUBLIC_ADS_PROVIDER; // 'monetag' | 'adsense'
 export const metadata: Metadata = {
   title: 'ServiciosPE',
   description: 'Plataforma para encontrar servicios locales en Perú',
+  icons: {
+    icon: '/logo_serviciosp.png',
+    shortcut: '/logo_serviciosp.png',
+    apple: '/logo_serviciosp.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

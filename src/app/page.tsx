@@ -1,4 +1,4 @@
-  // frontend/src/app/page.tsx
+ // frontend/src/app/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -270,12 +270,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Footer simple */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <p>© 2024 ServiciosPE. Conectando comunidades locales en Perú.</p>
-        </div>
-      </footer>
+     
     </div>
   );
 }

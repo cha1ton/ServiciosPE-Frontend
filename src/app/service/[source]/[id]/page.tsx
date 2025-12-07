@@ -73,6 +73,7 @@ export default function ServiceDetailPage() {
   const [replyWindowMin, setReplyWindowMin] = useState(15);
   const [replyDraft, setReplyDraft] = useState<Record<string, string>>({});
   const [replyingId, setReplyingId] = useState<string | null>(null);
+  const [collapsedReplies, setCollapsedReplies] = useState<Record<string, boolean>>({});
 
   function canEditOwnerReply(r: any) {
     if (!r.ownerReply) return false;
@@ -81,15 +82,27 @@ export default function ServiceDetailPage() {
     return now - created <= replyWindowMin * 60 * 1000;
   }
 
+  function getRelativeTime(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'ahora';
+    if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} min`;
+    if (diffInSeconds < 86400) return `hace ${Math.floor(diffInSeconds / 3600)} h`;
+    if (diffInSeconds < 604800) return `hace ${Math.floor(diffInSeconds / 86400)} d`;
+    if (diffInSeconds < 2592000) return `hace ${Math.floor(diffInSeconds / 604800)} sem`;
+    if (diffInSeconds < 31536000) return `hace ${Math.floor(diffInSeconds / 2592000)} mes`;
+    return `hace ${Math.floor(diffInSeconds / 31536000)} año`;
+  }
+
   useEffect(() => {
     if (!coordinates) getCurrentLocation();
-    
   }, []);
 
   const canFavorite = useMemo(() => item?.source === "serviciospe", [item?.source]);
   const canComment = canFavorite;
 
- 
   useEffect(() => {
     const source = params.source;
     const id = params.id;
@@ -128,7 +141,6 @@ export default function ServiceDetailPage() {
       if (!hit) await fetchFallback();
       setLoading(false);
     })();
-    
   }, [params.source, params.id]);
 
   // Cargar favoritos
@@ -264,9 +276,22 @@ export default function ServiceDetailPage() {
     }
   };
 
+  // Funciones del carrusel
+  const googleImages =
+    item && item.source === "google"
+      ? (item.photoRefs || []).map((ref: string) =>
+          `${process.env.NEXT_PUBLIC_API_URL}/places/photo?ref=${encodeURIComponent(
+            ref
+          )}&maxwidth=800`
+        )
+      : [];
 
+  const images = [
+    ...(((item as any)?.imagesUrl || []) as string[]),
+    ...googleImages,
+  ].filter(Boolean);
 
- 
+  const hasMultipleImages = images.length > 1;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -311,24 +336,6 @@ export default function ServiceDetailPage() {
       </div>
     );
   }
-
-  // Funciones del carrusel
-const googleImages =
-  item && item.source === "google"
-    ? (item.photoRefs || []).map((ref: string) =>
-        `${process.env.NEXT_PUBLIC_API_URL}/places/photo?ref=${encodeURIComponent(
-          ref
-        )}&maxwidth=800`
-      )
-    : [];
-
-const images = [
-  ...(((item as any)?.imagesUrl || []) as string[]),
-  ...googleImages,
-].filter(Boolean);
-
-
- const hasMultipleImages = images.length > 1;
 
   const hasOrigin =
     !!coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number";
@@ -488,7 +495,7 @@ const images = [
               </div>
             )}
 
-            {/* {item.contact?.email && (
+           {/*{item.contact?.email && (
               <div className={styles.infoItem}>
                 <span className={styles.infoIcon}>
                   <Mail size={18} />
@@ -512,32 +519,6 @@ const images = [
               </div>
             )}
           </div>
-
-          {/* Enlaces de Google Maps - Movidos aquí */}
-          {item.source === "google" && (
-            <div className={styles.googleLinksSection}>
-              <a
-                href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.googleLink}
-              >
-                <MessageCircle size={18} />
-                Ver reseñas en Google
-                <ExternalLink size={16} />
-              </a>
-              <a
-                href={`https://www.google.com/maps/place/?q=place_id:${item.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${styles.googleLink} ${styles.secondary}`}
-              >
-                <MapPin size={18} />
-                Abrir en Google Maps
-                <ExternalLink size={16} />
-              </a>
-            </div>
-          )}
 
           <div className={styles.actions}>
             {hasOrigin && hasDest ? (
@@ -708,14 +689,14 @@ const images = [
                 {reviews.map((r) => {
                   const ownerHasReply = !!r.ownerReply;
                   const editable = ownerHasReply && canEditOwnerReply(r);
+                  const isCollapsed = collapsedReplies[r._id] || false;
 
                   return (
                     <div key={r._id} className={styles.reviewItem}>
                       <div className={styles.reviewHeader}>
                         <span className={styles.reviewAuthor}>{r.authorName || "Usuario"}</span>
-                        <span className={styles.reviewDate}>•</span>
                         <span className={styles.reviewDate}>
-                          {new Date(r.createdAt).toLocaleDateString("es-PE")}
+                          {getRelativeTime(r.createdAt)}
                         </span>
                         <span className={styles.reviewRating}>
                           <Star size={16} fill="#fbbf24" color="#fbbf24" />
@@ -725,25 +706,35 @@ const images = [
 
                       <div className={styles.reviewComment}>{r.comment}</div>
 
-                      {/* Respuesta del dueño */}
+                      {/* Botón para contraer/expandir - SOLO SI HAY RESPUESTA */}
                       {ownerHasReply && (
+                        <button
+                          onClick={() =>
+                            setCollapsedReplies((prev) => ({
+                              ...prev,
+                              [r._id]: !prev[r._id],
+                            }))
+                          }
+                          className={styles.toggleReplyButton}
+                        >
+                          {isCollapsed ? '▼ Ver respuesta' : '▲ Ocultar respuesta'}
+                        </button>
+                      )}
+
+                      {/* Respuesta del dueño - SOLO SI NO ESTÁ COLAPSADA */}
+                      {ownerHasReply && !isCollapsed && (
                         <div className={styles.ownerReply}>
-                          <div className={styles.ownerReplyTitle}>
-                            <MessageCircle size={16} />
-                            Respuesta del dueño
-                          </div>
+                          <div className={styles.ownerReplyTitle}>Dueño</div>
                           <div className={styles.ownerReplyText}>{r.ownerReply.text}</div>
                           <div className={styles.ownerReplyMeta}>
                             {editable
                               ? `Puedes editar por ~${replyWindowMin} min desde la primera respuesta.`
-                              : `Respondido el ${new Date(
-                                  r.ownerReply.createdAt
-                                ).toLocaleString("es-PE")}`}
+                              : getRelativeTime(r.ownerReply.createdAt)}
                           </div>
                         </div>
                       )}
 
-                      {/* Acciones del dueño */}
+                      {/* Acciones del dueño - SOLO PARA EL DUEÑO */}
                       {canReply && (
                         <div className={styles.replyActions}>
                           {!ownerHasReply ? (
