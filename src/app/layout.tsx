@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   title: 'ServiciosPE',
   description: 'Plataforma para encontrar servicios locales en Perú',
   icons: {
-    icon: '/logo_serviciosp.png',
-    shortcut: '/logo_serviciosp.png',
-    apple: '/logo_serviciosp.png',
+    icon: '/logo_servicios.png',
+    shortcut: '/logo_servicios.png',
+    apple: '/logo_servicios.png',
   },
 };
 
