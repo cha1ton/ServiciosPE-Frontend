@@ -537,7 +537,7 @@ function buildWhyExplanation(state: LastResultsState): string {
               {coords ? (
                 <>
                   <MapPin size={12} />
-                  <span>Ubicación: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)} • Radio: {defaultDistance}m</span>
+                  <span>Ubicación: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}</span>
                 </>
               ) : (
                 <span>Sin ubicación</span>

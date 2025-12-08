@@ -398,7 +398,7 @@ export default function HomePage() {
               {results.map((item, i) => (
                 <div key={`${item.source}:${item.id}`}>
                   <ResultCard item={item} origin={coordinates ?? undefined} />
-                  {provider === "monetag" && i === 2 && (
+                  {/* {provider === "monetag" && i === 2 && (
                     <div className={styles.adCard}>
                       <DirectLinkCard
                         href={DIRECT_LINK_FEED}
@@ -406,7 +406,7 @@ export default function HomePage() {
                         text="Anuncio relevante para tu búsqueda."
                       />
                     </div>
-                  )}
+                  )} */}
                 </div>
               ))}
             </div>

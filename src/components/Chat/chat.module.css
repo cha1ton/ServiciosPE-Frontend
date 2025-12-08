@@ -224,13 +224,12 @@
   }
 }
 
-/*  ADS  */
+/* ADS */
 .adContainer {
-  margin: 12px 0;
-  padding: 12px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  margin: 8px 0;          /* Antes 12px */
+  padding: 0;             /* Quitamos padding extra del wrapper */
+  background: transparent;
+  border: none;           /* El borde lo maneja la tarjeta */
 }
 
 /*  INPUT  */
