@@ -240,7 +240,7 @@ useEffect(() => {
             </div>
           </form>
 
-          {/* Información adicional */}
+          {/* Información adicional 
           <div className={styles.infoSection}>
             <h3 className={styles.infoTitle}>Información de la Cuenta</h3>
             <div className={styles.infoGrid}>
@@ -251,7 +251,7 @@ useEffect(() => {
                 </span>
               </div>
             </div>
-          </div>
+          </div>*/}
         </div>
       </main>
     </div>
