@@ -26,6 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  AlertCircle,
 } from "lucide-react";
 import styles from "./detail.module.css";
 
@@ -270,7 +271,8 @@ export default function ServiceDetailPage() {
         }
       }
     } catch (e: any) {
-      setRevError(e?.message || "Error al enviar reseña");
+      const apiMsg = e?.response?.data?.message;
+      setRevError(apiMsg || e?.message || "Error al enviar reseña");
     } finally {
       setRevLoading(false);
     }
@@ -667,8 +669,17 @@ export default function ServiceDetailPage() {
                       >
                         Publicar Reseña
                       </button>
-                      {revError && <span className={styles.errorText}>{revError}</span>}
                     </div>
+
+                    {revError && (
+                      <div className={styles.reviewError}>
+                        <span className={styles.reviewErrorIcon}>
+                          <AlertCircle size={18} />
+                        </span>
+                        <span>{revError}</span>
+                      </div>
+                    )}
+
                   </>
                 )}
               </div>

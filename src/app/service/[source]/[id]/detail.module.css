@@ -15,6 +15,27 @@
   padding-top: 100px;
 }
 
+/* Mesanje de advertencia al comentar */
+
+.reviewError {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: #fef2f2;        /* rojo muy suave */
+  border: 1px solid #fecaca;  /* borde rojo claro */
+  color: #b91c1c;             /* texto rojo oscuro */
+  font-size: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.reviewErrorIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+
 /* 
    ESTADOS DE CARGA Y ERROR
     */

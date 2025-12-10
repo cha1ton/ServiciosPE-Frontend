@@ -593,7 +593,7 @@ function buildWhyExplanation(state: LastResultsState): string {
               </div>
             )}
 
-            {provider === 'monetag' && assistantCount >= 1 && (
+            {/* {provider === 'monetag' && assistantCount >= 1 && (
               <div className={styles.adContainer}>
                 <DirectLinkCard
                   href={DIRECT_LINK_CHAT}
@@ -601,7 +601,7 @@ function buildWhyExplanation(state: LastResultsState): string {
                   text="Descubre promociones locales seleccionadas."
                 />
               </div>
-            )}
+            )} */}
 
             {sending && (
               <div className={`${styles.messageWrapper} ${styles.assistantMessage}`}>
